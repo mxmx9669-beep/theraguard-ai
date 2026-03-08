@@ -42,20 +42,16 @@ export async function onRequest(context) {
       }
 
       const result = await getIndicationsForDrug(env, drug, patient);
-      return json(
-        {
-          ok: true,
-          indications: result.indications || [],
-          note: result.note || "",
-          drug_note: result.drug_note || ""
-        },
-        200,
-        corsHeaders
-      );
+      return json(result, 200, corsHeaders);
     }
 
-    if (action === "calculate") {
-      const result = await calculateRecommendation(env, body);
+    if (action === "calculate_review") {
+      const result = await calculateMedicationReview(env, body);
+      return json(result, 200, corsHeaders);
+    }
+
+    if (action === "drug_question") {
+      const result = await answerDrugQuestion(env, body);
       return json(result, 200, corsHeaders);
     }
 
@@ -65,7 +61,7 @@ export async function onRequest(context) {
       {
         ok: false,
         error: "Server error",
-        details: String(error)
+        details: String(error),
       },
       500,
       corsHeaders
@@ -73,30 +69,36 @@ export async function onRequest(context) {
   }
 }
 
+/* =========================
+   Response helper
+========================= */
 function json(data, status = 200, corsHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       "Content-Type": "application/json",
-      ...corsHeaders
-    }
+      ...corsHeaders,
+    },
   });
 }
 
+/* =========================
+   OpenAI HTTP helper
+========================= */
 async function openaiFetch(env, path, options = {}) {
   const response = await fetch(`https://api.openai.com/v1${path}`, {
     ...options,
     headers: {
       Authorization: `Bearer ${env.OPENAI_API_KEY}`,
       "Content-Type": "application/json",
-      ...(options.headers || {})
-    }
+      ...(options.headers || {}),
+    },
   });
 
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(`OpenAI error ${response.status}: ${JSON.stringify(data)}`);
+    throw new Error(`OpenAI request failed (${response.status}): ${JSON.stringify(data)}`);
   }
 
   return data;
@@ -135,7 +137,7 @@ function calcCrCl(age, sex, weightKg, scrUmol) {
   return crcl;
 }
 
-function buildPatientMetrics(patient) {
+function buildPatientMetrics(patient = {}) {
   const age = Number(patient.age || 0);
   const sex = patient.sex || "";
   const weight = Number(patient.weight || 0);
@@ -153,14 +155,14 @@ function buildPatientMetrics(patient) {
     ibw: ibw ? round1(ibw) : null,
     adjbw: adjbw ? round1(adjbw) : null,
     crcl_tbw: crcl_tbw ? round1(crcl_tbw) : null,
-    crcl_adjbw: crcl_adjbw ? round1(crcl_adjbw) : null
+    crcl_adjbw: crcl_adjbw ? round1(crcl_adjbw) : null,
   };
 }
 
 /* =========================
-   Drug list from vector store files
+   Vector store file catalog
 ========================= */
-async function getDrugsFromVectorStore(env) {
+async function listVectorStoreFiles(env) {
   const vsFiles = await openaiFetch(
     env,
     `/vector_stores/${env.VECTOR_STORE_ID}/files`,
@@ -168,7 +170,7 @@ async function getDrugsFromVectorStore(env) {
   );
 
   const items = Array.isArray(vsFiles.data) ? vsFiles.data : [];
-  const names = [];
+  const out = [];
 
   for (const item of items) {
     const fileId = item.id || item.file_id;
@@ -176,17 +178,34 @@ async function getDrugsFromVectorStore(env) {
 
     try {
       const fileObj = await openaiFetch(env, `/files/${fileId}`, { method: "GET" });
-      if (fileObj?.filename) {
-        const clean = cleanDrugName(fileObj.filename);
-        if (clean) names.push(clean);
-      }
-    } catch (_) {}
+      const filename = fileObj?.filename || "";
+      const drugName = cleanDrugName(filename);
+
+      out.push({
+        file_id: fileId,
+        filename,
+        drug_name: drugName,
+      });
+    } catch (_) {
+      // ignore one-file failures
+    }
   }
+
+  return out;
+}
+
+async function getDrugsFromVectorStore(env) {
+  const files = await listVectorStoreFiles(env);
+  const names = files
+    .map(f => f.drug_name)
+    .filter(Boolean);
 
   return [...new Set(names)].sort((a, b) => a.localeCompare(b));
 }
 
 function cleanDrugName(filename) {
+  if (!filename) return "";
+
   return filename
     .replace(/\.[^/.]+$/, "")
     .replace(/_/g, " ")
@@ -194,11 +213,30 @@ function cleanDrugName(filename) {
     .replace(/\bdrug information\b/gi, "")
     .replace(/\bmonograph\b/gi, "")
     .replace(/\bguideline\b/gi, "")
+    .replace(/\bprotocol\b/gi, "Protocol")
     .trim();
 }
 
+function normalize(s) {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+async function findDrugFiles(env, drug) {
+  const files = await listVectorStoreFiles(env);
+  const target = normalize(drug);
+
+  const exact = files.filter(f => normalize(f.drug_name) === target);
+  if (exact.length) return exact;
+
+  const loose = files.filter(f => normalize(f.drug_name).includes(target) || target.includes(normalize(f.drug_name)));
+  return loose;
+}
+
 /* =========================
-   Vector search
+   Vector search helpers
 ========================= */
 async function searchVectorStore(env, query, maxNumResults = 8) {
   const data = await openaiFetch(
@@ -208,25 +246,43 @@ async function searchVectorStore(env, query, maxNumResults = 8) {
       method: "POST",
       body: JSON.stringify({
         query,
-        max_num_results: maxNumResults
-      })
+        max_num_results: maxNumResults,
+      }),
     }
   );
 
   return Array.isArray(data.data) ? data.data : [];
 }
 
-function extractSearchTexts(results) {
-  const out = [];
+function filterResultsByFileIds(results, fileIds) {
+  if (!Array.isArray(fileIds) || !fileIds.length) return results;
+  return results.filter(r => fileIds.includes(r.file_id));
+}
+
+function mapResultsToEvidence(results, fileMap) {
+  const evidence = [];
 
   for (const item of results) {
-    if (!Array.isArray(item.content)) continue;
-    for (const c of item.content) {
-      if (c.type === "text" && c.text) out.push(c.text);
-    }
+    const textChunk = Array.isArray(item.content)
+      ? item.content.find(c => c.type === "text" && c.text)
+      : null;
+
+    if (!textChunk?.text) continue;
+
+    evidence.push({
+      file_id: item.file_id || null,
+      source: fileMap.get(item.file_id)?.filename || fileMap.get(item.file_id)?.drug_name || "Unknown source",
+      text: textChunk.text,
+    });
   }
 
-  return out;
+  return evidence;
+}
+
+function buildFileMap(files) {
+  const map = new Map();
+  for (const f of files) map.set(f.file_id, f);
+  return map;
 }
 
 /* =========================
@@ -242,14 +298,14 @@ async function runModel(env, systemPrompt, userPrompt) {
       input: [
         {
           role: "system",
-          content: [{ type: "input_text", text: systemPrompt }]
+          content: [{ type: "input_text", text: systemPrompt }],
         },
         {
           role: "user",
-          content: [{ type: "input_text", text: userPrompt }]
-        }
-      ]
-    })
+          content: [{ type: "input_text", text: userPrompt }],
+        },
+      ],
+    }),
   });
 
   return extractOutputText(data);
@@ -277,13 +333,13 @@ function parseJsonFromText(text) {
     return JSON.parse(text);
   } catch (_) {}
 
-  const match =
+  const fence =
     text.match(/```json\s*([\s\S]*?)```/i) ||
     text.match(/```([\s\S]*?)```/i);
 
-  if (match) {
+  if (fence) {
     try {
-      return JSON.parse(match[1].trim());
+      return JSON.parse(fence[1].trim());
     } catch (_) {}
   }
 
@@ -299,28 +355,28 @@ function parseJsonFromText(text) {
 }
 
 /* =========================
-   Patient-aware indications
+   Action: get_indications
 ========================= */
 async function getIndicationsForDrug(env, drug, patient) {
   const metrics = buildPatientMetrics(patient);
+  const drugFiles = await findDrugFiles(env, drug);
+  const fileIds = drugFiles.map(f => f.file_id);
+  const fileMap = buildFileMap(drugFiles);
 
-  const searchQuery = [
-    drug,
-    "indications",
-    "clinical pathways",
-    "dosing pathways",
-    patient.krt || "",
-    patient.aki || "",
-    patient.severity || ""
-  ].filter(Boolean).join(" ");
+  let results = await searchVectorStore(
+    env,
+    `${drug} indications clinical pathways approved uses dosing pathways`
+  );
 
-  const results = await searchVectorStore(env, searchQuery, 10);
-  const evidenceTexts = extractSearchTexts(results).slice(0, 10);
+  results = filterResultsByFileIds(results, fileIds);
+  const evidence = mapResultsToEvidence(results, fileMap).slice(0, 8);
 
   const systemPrompt = `
-You extract clinical indication/pathway options from drug protocol evidence.
+You extract indication/pathway options from drug monograph evidence.
 Return ONLY valid JSON.
 No markdown.
+Split clinically distinct branches into separate selectable options.
+If patient age or renal replacement therapy clearly changes the branch, prefer the patient-relevant branch.
 `;
 
   const userPrompt = `
@@ -333,19 +389,12 @@ Calculated metrics:
 ${JSON.stringify(metrics, null, 2)}
 
 Evidence:
-${evidenceTexts.map((t, i) => `SOURCE ${i + 1}:\n${t}`).join("\n\n")}
-
-Task:
-Return indication options specific to this drug.
-If the drug has multiple pathway branches, split them into separate selectable options.
-If age, dialysis, or renal function clearly changes the branch meaningfully, prefer the branch relevant to this patient.
-Do not invent unsupported options.
+${evidence.map((e, i) => `SOURCE ${i + 1} (${e.source}):\n${e.text}`).join("\n\n")}
 
 Return exactly:
 {
-  "indications": [
-    "..."
-  ],
+  "ok": true,
+  "indications": ["..."],
   "note": "...",
   "drug_note": "..."
 }
@@ -354,131 +403,260 @@ Return exactly:
   const text = await runModel(env, systemPrompt, userPrompt);
   const parsed = parseJsonFromText(text);
 
-  if (parsed && Array.isArray(parsed.indications)) {
+  if (parsed?.ok && Array.isArray(parsed.indications)) {
     return parsed;
   }
 
   return {
+    ok: true,
     indications: [],
-    note: "No indication options extracted",
-    drug_note: `Could not extract pathways for ${drug}`
+    note: "No structured indication options extracted",
+    drug_note: `Could not extract pathways for ${drug}`,
   };
 }
 
 /* =========================
-   Final structured calculation
+   Action: calculate_review
 ========================= */
-async function calculateRecommendation(env, body) {
-  const drug = (body.drug || "").trim();
-  const indication = (body.indication || "").trim();
+async function calculateMedicationReview(env, body) {
   const patient = body.patient || {};
-  const extra = body.extra || {};
-
-  if (!drug) return { ok: false, error: "Drug is required" };
-  if (!indication) return { ok: false, error: "Indication is required" };
-
+  const medications = Array.isArray(body.medications) ? body.medications : [];
   const metrics = buildPatientMetrics(patient);
 
-  const query = [
-    drug,
-    indication,
-    "dose",
-    "renal adjustment",
-    "dialysis",
-    "monitoring",
-    patient.krt || "",
-    patient.aki || "",
-    patient.severity || ""
-  ].filter(Boolean).join(" ");
+  if (!medications.length) {
+    return { ok: false, error: "At least one medication is required" };
+  }
 
-  const results = await searchVectorStore(env, query, 10);
-  const evidenceTexts = extractSearchTexts(results).slice(0, 10);
+  const review = [];
+  const allEvidence = [];
+  const allDrugNames = [];
 
-  const systemPrompt = `
-You are THERAGUARD AI, a clinical dosing assistant.
-Use ONLY supplied evidence and calculated patient data.
+  for (const med of medications) {
+    const drug = String(med.drug || "").trim();
+    const indication = String(med.indication || "").trim();
+    const currentDose = String(med.current_dose || "").trim();
+    const frequency = String(med.frequency || "").trim();
+    const route = String(med.route || "").trim();
+
+    if (!drug) continue;
+    allDrugNames.push(drug);
+
+    const drugFiles = await findDrugFiles(env, drug);
+    const fileIds = drugFiles.map(f => f.file_id);
+    const fileMap = buildFileMap(drugFiles);
+
+    let results = await searchVectorStore(
+      env,
+      [
+        drug,
+        indication,
+        currentDose,
+        frequency,
+        route,
+        "dose",
+        "renal adjustment",
+        "dialysis",
+        patient.krt || "",
+        patient.aki || "",
+        patient.severity || "",
+        "monitoring",
+        "warnings"
+      ].filter(Boolean).join(" "),
+      10
+    );
+
+    results = filterResultsByFileIds(results, fileIds);
+    const evidence = mapResultsToEvidence(results, fileMap).slice(0, 8);
+    allEvidence.push(...evidence);
+
+    const systemPrompt = `
+You are a clinical pharmacotherapy review assistant.
+Use ONLY the supplied evidence and patient metrics.
 Return ONLY valid JSON.
 No markdown.
-Output must be short, practical, and ready to display.
+Be concise and practical.
 `;
 
-  const userPrompt = `
+    const userPrompt = `
 Patient:
 ${JSON.stringify(patient, null, 2)}
 
 Calculated patient metrics:
 ${JSON.stringify(metrics, null, 2)}
 
-Extra:
-${JSON.stringify(extra, null, 2)}
-
-Drug:
-${drug}
-
-Selected pathway / indication:
-${indication}
+Medication to review:
+${JSON.stringify({
+  drug,
+  indication,
+  current_dose: currentDose,
+  frequency,
+  route,
+}, null, 2)}
 
 Evidence:
-${evidenceTexts.map((t, i) => `SOURCE ${i + 1}:\n${t}`).join("\n\n")}
+${evidence.map((e, i) => `SOURCE ${i + 1} (${e.source}):\n${e.text}`).join("\n\n")}
 
 Return exactly:
 {
-  "ok": true,
   "drug": "${drug}",
-  "indication": "${indication}",
-  "patient_summary": {
-    "bmi": null,
-    "ibw": null,
-    "adjbw": null,
-    "crcl_tbw": null,
-    "crcl_adjbw": null
-  },
-  "final_dose": "...",
-  "duration": "...",
-  "dosing": ["..."],
+  "assessment": "...",
+  "recommended_regimen": "...",
   "monitoring": ["..."],
   "warnings": ["..."],
   "evidence": ["..."],
-  "references": ["SOURCE 1", "SOURCE 2"],
-  "safety": {
-    "level": "ok",
-    "message": "..."
+  "references": ["SOURCE 1", "SOURCE 2"]
+}
+`;
+
+    const text = await runModel(env, systemPrompt, userPrompt);
+    const parsed = parseJsonFromText(text);
+
+    review.push(
+      parsed && parsed.drug
+        ? parsed
+        : {
+            drug,
+            assessment: "Unable to generate structured review",
+            recommended_regimen: "Review source manually",
+            monitoring: [],
+            warnings: [],
+            evidence: [],
+            references: [],
+          }
+    );
   }
+
+  const globalWarnings = await buildGlobalWarnings(env, patient, medications, metrics, allEvidence);
+
+  return {
+    ok: true,
+    patient_summary: metrics,
+    medication_review: review,
+    global_warnings: globalWarnings,
+  };
+}
+
+async function buildGlobalWarnings(env, patient, medications, metrics, evidence) {
+  const systemPrompt = `
+You are a medication safety assistant.
+Use only supplied evidence and medication list.
+Return ONLY valid JSON.
+No markdown.
+`;
+
+  const userPrompt = `
+Patient:
+${JSON.stringify(patient, null, 2)}
+
+Calculated metrics:
+${JSON.stringify(metrics, null, 2)}
+
+Medication list:
+${JSON.stringify(medications, null, 2)}
+
+Evidence:
+${evidence.slice(0, 12).map((e, i) => `SOURCE ${i + 1} (${e.source}):\n${e.text}`).join("\n\n")}
+
+Return exactly:
+{
+  "global_warnings": ["..."]
 }
 
 Rules:
-- final_dose must be one clear final regimen
-- duration should be short and specific if supported
-- dosing can include supporting practical details
-- monitoring must be short bullet items
-- warnings must be short bullet items
-- patient_summary must reuse the provided calculated metrics exactly if available
-- if evidence is insufficient, say so clearly but still keep JSON structure
+- Focus on interaction risks, duplicate therapy, additive toxicity, renal safety, bleeding risk, QT risk, nephrotoxicity, overlapping spectrum
+- If no strong global warning is supported, return an empty array
 `;
 
   const text = await runModel(env, systemPrompt, userPrompt);
   const parsed = parseJsonFromText(text);
 
-  if (parsed && parsed.ok) {
-    if (!parsed.patient_summary) parsed.patient_summary = metrics;
+  return Array.isArray(parsed?.global_warnings) ? parsed.global_warnings : [];
+}
+
+/* =========================
+   Action: drug_question
+========================= */
+async function answerDrugQuestion(env, body) {
+  const drug = String(body.drug || "").trim();
+  const question = String(body.question || "").trim();
+
+  if (!drug) return { ok: false, error: "Drug is required" };
+  if (!question) return { ok: false, error: "Question is required" };
+
+  const drugFiles = await findDrugFiles(env, drug);
+  if (!drugFiles.length) {
+    return { ok: false, error: `No vector-store file matched for ${drug}` };
+  }
+
+  const fileIds = drugFiles.map(f => f.file_id);
+  const fileMap = buildFileMap(drugFiles);
+
+  let results = await searchVectorStore(
+    env,
+    `${drug} ${question}`,
+    12
+  );
+
+  results = filterResultsByFileIds(results, fileIds);
+  const evidence = mapResultsToEvidence(results, fileMap).slice(0, 10);
+
+  const systemPrompt = `
+You are a drug monograph Q&A assistant.
+Answer ONLY from the supplied evidence for the selected drug.
+Return ONLY valid JSON.
+No markdown.
+The answer must be short.
+Provide 2 to 3 evidence quotes directly supporting the answer.
+`;
+
+  const userPrompt = `
+Selected drug: ${drug}
+
+Question:
+${question}
+
+Evidence from selected drug file(s):
+${evidence.map((e, i) => `SOURCE ${i + 1} (${e.source}):\n${e.text}`).join("\n\n")}
+
+Return exactly:
+{
+  "ok": true,
+  "drug": "${drug}",
+  "question": "${question}",
+  "answer": "...",
+  "evidence": [
+    {
+      "quote": "...",
+      "source": "...",
+      "page": null
+    }
+  ]
+}
+
+Rules:
+- answer should be concise
+- evidence must contain 2 to 3 items if possible
+- quote must be short verbatim or near-verbatim from provided evidence
+- if page number is unknown, use null
+- do not invent page numbers
+`;
+
+  const text = await runModel(env, systemPrompt, userPrompt);
+  const parsed = parseJsonFromText(text);
+
+  if (parsed?.ok && Array.isArray(parsed.evidence)) {
     return parsed;
   }
 
   return {
     ok: true,
     drug,
-    indication,
-    patient_summary: metrics,
-    final_dose: "Unable to generate structured final dose",
-    duration: "Not clearly determined",
-    dosing: [],
-    monitoring: [],
-    warnings: [],
-    evidence: [],
-    references: [],
-    safety: {
-      level: "warn",
-      message: "Model returned unstructured output"
-    }
+    question,
+    answer: "Unable to generate structured answer from the selected drug file.",
+    evidence: evidence.slice(0, 3).map(e => ({
+      quote: e.text.slice(0, 300),
+      source: e.source,
+      page: null,
+    })),
   };
 }
