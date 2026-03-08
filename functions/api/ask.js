@@ -150,12 +150,25 @@ function buildPatientMetrics(patient = {}) {
   const crcl_tbw = calcCrCl(age, sex, weight, scr);
   const crcl_adjbw = adjbw ? calcCrCl(age, sex, adjbw, scr) : null;
 
+  let dosing_weight_type = "TBW";
+  let dosing_weight = weight;
+
+  if (bmi && bmi >= 30 && adjbw) {
+    dosing_weight_type = "AdjBW";
+    dosing_weight = adjbw;
+  }
+
+  const crcl_dosing = calcCrCl(age, sex, dosing_weight, scr);
+
   return {
     bmi: bmi ? round1(bmi) : null,
     ibw: ibw ? round1(ibw) : null,
     adjbw: adjbw ? round1(adjbw) : null,
     crcl_tbw: crcl_tbw ? round1(crcl_tbw) : null,
     crcl_adjbw: crcl_adjbw ? round1(crcl_adjbw) : null,
+    dosing_weight_type,
+    dosing_weight: dosing_weight ? round1(dosing_weight) : null,
+    crcl_dosing: crcl_dosing ? round1(crcl_dosing) : null,
   };
 }
 
@@ -259,6 +272,22 @@ function filterResultsByFileIds(results, fileIds) {
   return results.filter(r => fileIds.includes(r.file_id));
 }
 
+function buildFileMap(files) {
+  const map = new Map();
+  for (const f of files) map.set(f.file_id, f);
+  return map;
+}
+
+function parsePageFromText(text) {
+  const s = String(text || "");
+  const match =
+    s.match(/\bpage\s*[:\-]?\s*(\d{1,4})\b/i) ||
+    s.match(/\bp\.\s*(\d{1,4})\b/i) ||
+    s.match(/\bp\s*(\d{1,4})\b/i);
+
+  return match ? Number(match[1]) : null;
+}
+
 function mapResultsToEvidence(results, fileMap) {
   const evidence = [];
 
@@ -273,16 +302,11 @@ function mapResultsToEvidence(results, fileMap) {
       file_id: item.file_id || null,
       source: fileMap.get(item.file_id)?.filename || fileMap.get(item.file_id)?.drug_name || "Unknown source",
       text: textChunk.text,
+      page: parsePageFromText(textChunk.text),
     });
   }
 
   return evidence;
-}
-
-function buildFileMap(files) {
-  const map = new Map();
-  for (const f of files) map.set(f.file_id, f);
-  return map;
 }
 
 /* =========================
@@ -365,7 +389,7 @@ async function getIndicationsForDrug(env, drug, patient) {
 
   let results = await searchVectorStore(
     env,
-    `${drug} indications clinical pathways approved uses dosing pathways`
+    `${drug} indications clinical pathways approved uses dosing pathways renal dialysis dosing`
   );
 
   results = filterResultsByFileIds(results, fileIds);
@@ -376,7 +400,7 @@ You extract indication/pathway options from drug monograph evidence.
 Return ONLY valid JSON.
 No markdown.
 Split clinically distinct branches into separate selectable options.
-If patient age or renal replacement therapy clearly changes the branch, prefer the patient-relevant branch.
+If patient age, renal function, obesity, or renal replacement therapy clearly changes the branch, prefer patient-relevant branches.
 `;
 
   const userPrompt = `
@@ -454,11 +478,18 @@ async function calculateMedicationReview(env, body) {
         frequency,
         route,
         "dose",
+        "loading dose",
+        "maintenance dose",
+        "duration",
+        "therapy strategy",
+        "titration",
         "renal adjustment",
         "dialysis",
         patient.krt || "",
         patient.aki || "",
         patient.severity || "",
+        patient.route_preference || "",
+        patient.infusion || "",
         "monitoring",
         "warnings"
       ].filter(Boolean).join(" "),
@@ -475,6 +506,8 @@ Use ONLY the supplied evidence and patient metrics.
 Return ONLY valid JSON.
 No markdown.
 Be concise and practical.
+Do not invent recommendations outside the evidence.
+Separate regimen into structured fields whenever possible.
 `;
 
     const userPrompt = `
@@ -494,13 +527,17 @@ ${JSON.stringify({
 }, null, 2)}
 
 Evidence:
-${evidence.map((e, i) => `SOURCE ${i + 1} (${e.source}):\n${e.text}`).join("\n\n")}
+${evidence.map((e, i) => `SOURCE ${i + 1} (${e.source}${e.page ? `, Page ${e.page}` : ""}):\n${e.text}`).join("\n\n")}
 
 Return exactly:
 {
   "drug": "${drug}",
   "assessment": "...",
   "recommended_regimen": "...",
+  "recommended_dose": "...",
+  "recommended_frequency": "...",
+  "recommended_duration": "...",
+  "therapy_strategy": "...",
   "monitoring": ["..."],
   "warnings": ["..."],
   "evidence": ["..."],
@@ -518,6 +555,10 @@ Return exactly:
             drug,
             assessment: "Unable to generate structured review",
             recommended_regimen: "Review source manually",
+            recommended_dose: "",
+            recommended_frequency: "",
+            recommended_duration: "",
+            therapy_strategy: "",
             monitoring: [],
             warnings: [],
             evidence: [],
@@ -527,12 +568,14 @@ Return exactly:
   }
 
   const globalWarnings = await buildGlobalWarnings(env, patient, medications, metrics, allEvidence);
+  const ddi = await detectDDI(env, patient, medications, metrics, allEvidence);
 
   return {
     ok: true,
     patient_summary: metrics,
     medication_review: review,
     global_warnings: globalWarnings,
+    ddi_summary: ddi,
   };
 }
 
@@ -555,7 +598,7 @@ Medication list:
 ${JSON.stringify(medications, null, 2)}
 
 Evidence:
-${evidence.slice(0, 12).map((e, i) => `SOURCE ${i + 1} (${e.source}):\n${e.text}`).join("\n\n")}
+${evidence.slice(0, 12).map((e, i) => `SOURCE ${i + 1} (${e.source}${e.page ? `, Page ${e.page}` : ""}):\n${e.text}`).join("\n\n")}
 
 Return exactly:
 {
@@ -573,12 +616,94 @@ Rules:
   return Array.isArray(parsed?.global_warnings) ? parsed.global_warnings : [];
 }
 
+async function detectDDI(env, patient, medications, metrics, evidence) {
+  if (!Array.isArray(medications) || medications.length < 2) {
+    return {
+      has_ddi: false,
+      interactions: []
+    };
+  }
+
+  const medNames = medications
+    .map(m => String(m.drug || "").trim())
+    .filter(Boolean);
+
+  const pairText = [];
+  for (let i = 0; i < medNames.length; i++) {
+    for (let j = i + 1; j < medNames.length; j++) {
+      pairText.push(`${medNames[i]} + ${medNames[j]}`);
+    }
+  }
+
+  const systemPrompt = `
+You are a structured drug-drug interaction assistant.
+Use ONLY the supplied evidence, medication list, and patient context.
+Return ONLY valid JSON.
+No markdown.
+Only report interactions supported by supplied evidence or strongly inferable from supplied evidence.
+`;
+
+  const userPrompt = `
+Patient:
+${JSON.stringify(patient, null, 2)}
+
+Calculated metrics:
+${JSON.stringify(metrics, null, 2)}
+
+Medications:
+${JSON.stringify(medications, null, 2)}
+
+Medication pairs:
+${JSON.stringify(pairText, null, 2)}
+
+Evidence:
+${evidence.slice(0, 16).map((e, i) => `SOURCE ${i + 1} (${e.source}${e.page ? `, Page ${e.page}` : ""}):\n${e.text}`).join("\n\n")}
+
+Return exactly:
+{
+  "has_ddi": true,
+  "interactions": [
+    {
+      "pair": "...",
+      "exists": "Yes",
+      "mechanism": "...",
+      "clinical_risk": "...",
+      "management": "..."
+    }
+  ]
+}
+
+Rules:
+- If no clinically meaningful DDI is supported, return:
+{
+  "has_ddi": false,
+  "interactions": []
+}
+- Keep management short and practical
+- Prefer renal toxicity, bleeding, QT, CNS depression, duplicate anticoagulation, serotonin toxicity, electrolyte-related risk, additive hypotension, overlapping spectrum, and TDM-relevant interactions
+`;
+
+  const text = await runModel(env, systemPrompt, userPrompt);
+  const parsed = parseJsonFromText(text);
+
+  if (typeof parsed?.has_ddi === "boolean" && Array.isArray(parsed?.interactions)) {
+    return parsed;
+  }
+
+  return {
+    has_ddi: false,
+    interactions: []
+  };
+}
+
 /* =========================
    Action: drug_question
 ========================= */
 async function answerDrugQuestion(env, body) {
   const drug = String(body.drug || "").trim();
   const question = String(body.question || "").trim();
+  const patient = body.patient || {};
+  const metrics = buildPatientMetrics(patient);
 
   if (!drug) return { ok: false, error: "Drug is required" };
   if (!question) return { ok: false, error: "Question is required" };
@@ -593,7 +718,20 @@ async function answerDrugQuestion(env, body) {
 
   let results = await searchVectorStore(
     env,
-    `${drug} ${question}`,
+    [
+      drug,
+      question,
+      patient.krt || "",
+      patient.aki || "",
+      patient.severity || "",
+      patient.route_preference || "",
+      "renal adjustment",
+      "dialysis",
+      "CRRT",
+      "HD",
+      "PIRRT",
+      "monitoring"
+    ].filter(Boolean).join(" "),
     12
   );
 
@@ -607,16 +745,23 @@ Return ONLY valid JSON.
 No markdown.
 The answer must be short.
 Provide 2 to 3 evidence quotes directly supporting the answer.
+Use patient context only to prioritize relevant evidence, not to invent unsupported advice.
 `;
 
   const userPrompt = `
 Selected drug: ${drug}
 
+Patient:
+${JSON.stringify(patient, null, 2)}
+
+Calculated metrics:
+${JSON.stringify(metrics, null, 2)}
+
 Question:
 ${question}
 
 Evidence from selected drug file(s):
-${evidence.map((e, i) => `SOURCE ${i + 1} (${e.source}):\n${e.text}`).join("\n\n")}
+${evidence.map((e, i) => `SOURCE ${i + 1} (${e.source}${e.page ? `, Page ${e.page}` : ""}):\n${e.text}`).join("\n\n")}
 
 Return exactly:
 {
@@ -656,7 +801,7 @@ Rules:
     evidence: evidence.slice(0, 3).map(e => ({
       quote: e.text.slice(0, 300),
       source: e.source,
-      page: null,
+      page: e.page || null,
     })),
   };
 }
