@@ -26,19 +26,18 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body { 
-    margin: 0; 
-    padding: 32px 16px; 
-    font-family: 'Inter', sans-serif; 
-    background: var(--bg); 
-    color: var(--text); 
+  body {
+    margin: 0;
+    padding: 32px 16px;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
 
   .container { max-width: 1000px; margin: 0 auto; }
 
-  /* Header Branding */
   .topbar {
     background: var(--pri);
     border-radius: 16px;
@@ -57,7 +56,6 @@
   .header-center { font-weight: 600; font-size: 12px; color: #fff; background: rgba(255,255,255,0.1); padding: 6px 16px; border-radius: 99px; }
   .header-right { font-weight: 700; font-size: 13px; color: var(--ok); display: flex; align-items: center; gap: 6px; }
 
-  /* Card Redesign */
   .card {
     background: var(--card);
     border: 1px solid var(--line);
@@ -65,43 +63,42 @@
     box-shadow: var(--shadow);
     padding: 28px;
     margin-bottom: 20px;
-    transition: transform 0.2s ease;
   }
 
-  .stepTitle { 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
+  .stepTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 24px;
     padding-bottom: 12px;
     border-bottom: 2px solid var(--bg);
   }
+
   .stepTitle h2 { font-size: 18px; font-weight: 700; color: var(--pri); }
-  
-  .badge { 
-    font-size: 11px; 
-    padding: 4px 12px; 
-    border-radius: 99px; 
-    border: 1px solid var(--line); 
-    color: var(--muted); 
-    background: var(--bg); 
-    font-weight: 700; 
+
+  .badge {
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 99px;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    background: var(--bg);
+    font-weight: 700;
     text-transform: uppercase;
   }
 
-  /* Form Elements */
   .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
   .field { display: flex; flex-direction: column; gap: 8px; }
-  
-  label { 
-    font-size: 11px; 
-    color: var(--muted); 
-    font-weight: 700; 
-    text-transform: uppercase; 
-    letter-spacing: 0.05em; 
+
+  label {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
-  input, select {
+  input, select, textarea {
     height: 44px;
     padding: 0 14px;
     border-radius: 8px;
@@ -112,16 +109,28 @@
     font-size: 14px;
     font-weight: 500;
     transition: all 0.2s ease;
+    width: 100%;
   }
 
-  input:focus, select:focus {
+  textarea {
+    min-height: 110px;
+    height: auto;
+    padding: 14px;
+    resize: vertical;
+  }
+
+  input:focus, select:focus, textarea:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 4px var(--accent-soft);
   }
 
-  input:disabled { background: var(--bg); color: var(--muted); cursor: not-allowed; border-style: dashed; }
+  input:disabled, textarea:disabled {
+    background: var(--bg);
+    color: var(--muted);
+    cursor: not-allowed;
+    border-style: dashed;
+  }
 
-  /* Summary Box */
   .box {
     background: var(--pri);
     color: #fff;
@@ -133,20 +142,32 @@
   }
 
   .row { display: flex; gap: 10px; flex-wrap: wrap; }
-  .pill { 
-    padding: 6px 14px; 
-    border-radius: 8px; 
-    background: rgba(255,255,255,0.1); 
-    font-size: 12px; 
-    color: #fff; 
-    border: 1px solid rgba(255,255,255,0.05); 
+  .pill {
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    font-size: 12px;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.05);
   }
   .pill b { color: var(--accent); margin-right: 4px; }
 
   .divider { height: 1px; background: var(--line); margin: 24px 0; }
   .hidden { display: none !important; }
 
-  /* Safety & TDM Banners */
+  .status-note {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
   .safetyBanner {
     border-radius: 8px;
     padding: 14px 18px;
@@ -159,18 +180,6 @@
   .safety-warn { background: #fffbeb; color: #92400e; border-left-color: var(--warn); }
   .safety-bad { background: #fef2f2; color: #991b1b; border-left-color: var(--bad); }
 
-  .tdmBanner {
-    margin-top: 16px;
-    border-radius: 10px;
-    padding: 18px;
-    border: 1px solid var(--line);
-  }
-  .tdmTitle { font-weight: 800; font-size: 14px; margin-bottom: 8px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
-  .tdm-low { background: #f0f9ff; border-color: #bae6fd; color: #0369a1; }
-  .tdm-ok { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
-  .tdm-high { background: #fff1f2; border-color: #fecdd3; color: #9f1239; }
-
-  /* Output Styling */
   #doseBox {
     background: #fff;
     color: var(--text);
@@ -178,38 +187,51 @@
     padding: 24px;
     border-radius: 12px;
   }
-  #doseBox b { color: var(--pri); }
 
-  /* References Section */
-  .ref-block {
-    margin-top: 32px;
-    padding: 24px;
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-  }
-  .ref-title { font-weight: 800; font-size: 14px; color: var(--pri); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .ref-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
-  
-  .ref-btn {
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--pri2);
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: left;
+  .calc-btn-container {
+    margin-top: 24px;
+    text-align: right;
     display: flex;
-    align-items: center;
-    gap: 8px;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
   }
-  .ref-btn:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
-  .ref-btn::before { content: "📄"; font-size: 14px; }
 
-  /* Footer */
+  #calculateBtn, #resetBtn {
+    border: none;
+    padding: 14px 26px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  #calculateBtn {
+    background: var(--pri);
+    color: #fff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  }
+
+  #calculateBtn:hover {
+    background: var(--pri2);
+    transform: translateY(-1px);
+  }
+
+  #calculateBtn:disabled,
+  #resetBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  #resetBtn {
+    background: #fff;
+    color: var(--pri);
+    border: 1px solid var(--line);
+  }
+
   .footerDisclaimer {
     text-align: center;
     font-size: 12px;
@@ -218,53 +240,26 @@
     padding-top: 24px;
     border-top: 1px solid var(--line);
   }
-  .footerCredit { 
-    font-weight: 700; 
-    color: var(--pri); 
-    margin-top: 8px; 
-    font-size: 13px; 
+  .footerCredit {
+    font-weight: 700;
+    color: var(--pri);
+    margin-top: 8px;
+    font-size: 13px;
     letter-spacing: 0.02em;
     text-transform: uppercase;
   }
 
-  /* Calculate Button */
-  .calc-btn-container {
-    margin-top: 24px;
-    text-align: right;
-  }
-  
-  #calculateBtn {
-    background: var(--pri);
-    color: white;
-    border: none;
-    padding: 14px 32px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-  }
-  
-  #calculateBtn:hover {
-    background: var(--pri2);
-    transform: translateY(-1px);
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-  }
-  
-  #calculateBtn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
+  @media (max-width: 980px) {
+    .grid { grid-template-columns: repeat(6, 1fr); }
   }
 
-  @media (max-width: 980px) { .grid { grid-template-columns: repeat(6, 1fr); } }
   @media (max-width: 620px) {
     .grid { grid-template-columns: repeat(1, 1fr); }
     .field { grid-column: span 1 !important; }
     .topbar { flex-direction: column; text-align: center; gap: 16px; padding: 24px; }
     .header-right { justify-content: center; }
+    .calc-btn-container { justify-content: stretch; }
+    #calculateBtn, #resetBtn { width: 100%; }
   }
 </style>
 </head>
@@ -276,7 +271,7 @@
       <div class="brand-main">THERAGUARD AI</div>
       <div class="brand-sub">Patient-Specific Clinical Safety Engine</div>
     </div>
-    <div class="header-center">v3.0.0 Cloud-Native</div>
+    <div class="header-center">v3.1.0 Cloud-Native</div>
     <div class="header-right">● AI BACKEND ACTIVE</div>
   </div>
 
@@ -392,13 +387,14 @@
     <div class="grid">
       <div class="field" style="grid-column: span 6;">
         <label>Drug Selection</label>
-        <input id="drugSearch" list="drugList" placeholder="Search drug database...">
-        <datalist id="drugList"></datalist>
+        <select id="drugSearch">
+          <option value="">Loading drugs...</option>
+        </select>
       </div>
 
       <div class="field" style="grid-column: span 6;">
         <label>Clinical Guidance Note</label>
-        <input id="drugHint" disabled value="Will be fetched from AI backend">
+        <input id="drugHint" disabled value="Waiting for backend...">
       </div>
     </div>
 
@@ -408,12 +404,12 @@
       <div class="field" style="grid-column: span 6;">
         <label>Indication / Clinical Pathway</label>
         <select id="indication">
-          <option value=""></option>
+          <option value="">Select drug first</option>
         </select>
       </div>
       <div class="field" style="grid-column: span 6;">
         <label>Status</label>
-        <input id="indHint" disabled value="Select indication">
+        <input id="indHint" disabled value="Waiting for indication">
       </div>
     </div>
 
@@ -437,7 +433,7 @@
       </div>
       <div class="field" style="grid-column: span 4;">
         <label>Auto-Adjustment</label>
-        <input disabled value="AI will calculate adjustments">
+        <input disabled value="Included in backend request">
       </div>
     </div>
 
@@ -448,7 +444,7 @@
       </div>
       <div class="field" style="grid-column: span 6;">
         <label>TDM Engine</label>
-        <input id="vancoTdmHint" disabled value="AI will interpret levels">
+        <input id="vancoTdmHint" disabled value="Included in backend request">
       </div>
     </div>
 
@@ -479,34 +475,16 @@
       </div>
       <div class="field" style="grid-column: span 6;">
         <label>Note</label>
-        <input disabled value="AI will incorporate into dosing">
+        <input disabled value="Included in backend request">
       </div>
     </div>
 
     <div class="calc-btn-container">
-      <button id="calculateBtn">Calculate Dose →</button>
+      <button id="resetBtn" type="button">Reset</button>
+      <button id="calculateBtn" type="button">Calculate Dose →</button>
     </div>
 
     <div class="box hidden" id="doseBox"></div>
-  </div>
-
-  <div class="ref-block" id="referencesSection">
-    <div class="ref-title">Clinical Reference Library</div>
-    <div class="ref-grid">
-      <button class="ref-btn" onclick="window.open('references/Amiodarone.pdf','_blank')">Amiodarone</button>
-      <button class="ref-btn" onclick="window.open('references/ANTICOAGULATION PROTOCOL .pdf','_blank')">Anticoag Protocol</button>
-      <button class="ref-btn" onclick="window.open('references/Ciprofloxacin.pdf','_blank')">Ciprofloxacin</button>
-      <button class="ref-btn" onclick="window.open('references/colistin.pdf','_blank')">Colistin</button>
-      <button class="ref-btn" onclick="window.open('references/Levofloxacin.pdf','_blank')">Levofloxacin</button>
-      <button class="ref-btn" onclick="window.open('references/Meropenem.pdf','_blank')">Meropenem</button>
-      <button class="ref-btn" onclick="window.open('references/MOH_Vanco_TDM.pdf','_blank')">MOH Vanco TDM</button>
-      <button class="ref-btn" onclick="window.open('references/MOH_Warfarin_Protocol.pdf','_blank')">MOH Warfarin</button>
-      <button class="ref-btn" onclick="window.open('references/Piperacillin_Tazobactam.pdf','_blank')">Piperacillin/Tazo</button>
-      <button class="ref-btn" onclick="window.open('references/Procainamide.pdf','_blank')">Procainamide</button>
-      <button class="ref-btn" onclick="window.open('references/Trimethoprim-sulfamethoxazole (co-trimoxazole...).pdf','_blank')">TMP-SMX</button>
-      <button class="ref-btn" onclick="window.open('references/Vancomycin.pdf','_blank')">Vancomycin</button>
-      <button class="ref-btn" onclick="window.open('references/Warfarin.pdf','_blank')">Warfarin</button>
-    </div>
   </div>
 
   <div class="footerDisclaimer">
@@ -516,16 +494,7 @@
 </div>
 
 <script>
-/* =========================
-   UI-ONLY FRONTEND
-   No embedded drug data
-   No clinical calculation logic
-   Pure data collector
-========================= */
-
-// DOM Elements
 const els = {
-  // Patient inputs
   age: document.getElementById("age"),
   sex: document.getElementById("sex"),
   wt: document.getElementById("wt"),
@@ -536,53 +505,61 @@ const els = {
   route: document.getElementById("route"),
   severity: document.getElementById("severity"),
   infusion: document.getElementById("infusion"),
-  
-  // UI elements
+
   calcBox: document.getElementById("calcBox"),
   step2: document.getElementById("step2"),
   s1Badge: document.getElementById("s1Badge"),
   s2Badge: document.getElementById("s2Badge"),
-  
-  // Drug selection
+
   drugSearch: document.getElementById("drugSearch"),
-  drugList: document.getElementById("drugList"),
   drugHint: document.getElementById("drugHint"),
-  
-  // Indication
+
   indRow: document.getElementById("indRow"),
   indication: document.getElementById("indication"),
   indHint: document.getElementById("indHint"),
   doseBox: document.getElementById("doseBox"),
-  
-  // Female-specific
+
   pregField: document.getElementById("pregField"),
   lactField: document.getElementById("lactField"),
   pregStatus: document.getElementById("pregStatus"),
   lactStatus: document.getElementById("lactStatus"),
-  
-  // Drug-specific fields
+
+  vancoTdmRow: document.getElementById("vancoTdmRow"),
   vancoTrough: document.getElementById("vancoTrough"),
+  vancoTdmHint: document.getElementById("vancoTdmHint"),
+
+  arcRow: document.getElementById("arcRow"),
   arc: document.getElementById("arc"),
+  arcBandField: document.getElementById("arcBandField"),
   arcBand: document.getElementById("arcBand"),
+
+  pirrtRow: document.getElementById("pirrtRow"),
   pirrtUO: document.getElementById("pirrtUO"),
+
+  procRow: document.getElementById("procRow"),
   procRate: document.getElementById("procRate"),
   childPugh: document.getElementById("childPugh"),
-  
-  // Hidden rows
-  vancoTdmRow: document.getElementById("vancoTdmRow"),
-  arcRow: document.getElementById("arcRow"),
-  arcBandField: document.getElementById("arcBandField"),
-  pirrtRow: document.getElementById("pirrtRow"),
-  procRow: document.getElementById("procRow"),
-  
-  // Button
-  calculateBtn: document.getElementById("calculateBtn")
+
+  calculateBtn: document.getElementById("calculateBtn"),
+  resetBtn: document.getElementById("resetBtn")
 };
 
-// Helper functions
+let currentDrug = "";
+let currentInd = "";
+
 function round1(x) { return Math.round(x * 10) / 10; }
 
-// Weight calculations (kept for patient summary display only)
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str).replace(/[&<>"']/g, m => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[m]);
+}
+
 function calcIBW() {
   const htCm = parseFloat(els.ht.value);
   const sex = els.sex.value;
@@ -623,15 +600,15 @@ function calcCrCl_TBW() {
 }
 
 function patientReady() {
-  const age = parseFloat(els.age.value);
-  const wt = parseFloat(els.wt.value);
-  const ht = parseFloat(els.ht.value);
-  const scr = parseFloat(els.scr.value);
-  const sex = els.sex.value;
-  return !!(age && wt && ht && scr && sex);
+  return !!(
+    parseFloat(els.age.value) &&
+    parseFloat(els.wt.value) &&
+    parseFloat(els.ht.value) &&
+    parseFloat(els.scr.value) &&
+    els.sex.value
+  );
 }
 
-// Update female fields visibility
 function updateFemaleFields() {
   const isF = (els.sex.value === "F");
   if (isF) {
@@ -645,7 +622,6 @@ function updateFemaleFields() {
   }
 }
 
-// Update patient summary box (local calculations only)
 function updatePatientBox() {
   if (!patientReady()) {
     els.s1Badge.textContent = "REQUIRED";
@@ -666,129 +642,223 @@ function updatePatientBox() {
   if (crcl) pills.push(`<span class="pill"><b>CrCl</b>${round1(crcl)} mL/min</span>`);
   if (ibw) pills.push(`<span class="pill"><b>IBW</b>${round1(ibw)} kg</span>`);
   if (adj) pills.push(`<span class="pill"><b>AdjBW</b>${round1(adj)} kg</span>`);
-  pills.push(`<span class="pill"><b>KRT</b>${krt.toUpperCase()}</span>`);
+  pills.push(`<span class="pill"><b>KRT</b>${escapeHtml(krt.toUpperCase())}</span>`);
 
   els.calcBox.innerHTML = `<div class="row">${pills.join("")}</div>`;
-  
   els.step2.classList.remove("hidden");
   els.s1Badge.textContent = "READY";
   els.s1Badge.style.color = "var(--ok)";
 }
 
-// Drug list - ONLY NAMES, no data
-const DRUG_NAMES = [
-  "Piperacillin/Tazobactam",
-  "Meropenem",
-  "Levofloxacin",
-  "Ciprofloxacin (IR)",
-  "TMP-SMX (Co-trimoxazole)",
-  "Vancomycin (IV)",
-  "Colistin (CMS) – IV",
-  "Amiodarone",
-  "Procainamide"
-];
-
-// Build drug datalist
-function rebuildDrugList() {
-  els.drugList.innerHTML = "";
-  DRUG_NAMES.forEach(name => {
-    const opt = document.createElement("option");
-    opt.value = name;
-    els.drugList.appendChild(opt);
-  });
-}
-
-// Drug selection
-let currentDrug = "";
-let currentInd = "";
-
-function setDrug(drugName) {
-  currentDrug = drugName;
-  
-  // Clear indication dropdown
-  els.indication.innerHTML = `<option value=""></option>`;
+function clearDrugDependentUI() {
   currentInd = "";
-  
-  if (!DRUG_NAMES.includes(drugName)) {
-    els.s2Badge.textContent = "SELECT";
-    els.s2Badge.style.color = "var(--muted)";
-    els.indRow.classList.add("hidden");
-    
-    // Hide drug-specific fields
-    els.vancoTdmRow.classList.add("hidden");
-    els.arcRow.classList.add("hidden");
-    els.pirrtRow.classList.add("hidden");
-    els.procRow.classList.add("hidden");
-    return;
-  }
-  
-  els.s2Badge.textContent = "SELECTED";
-  els.s2Badge.style.color = "var(--ok)";
-  els.indRow.classList.remove("hidden");
-  
-  // Show drug-specific fields based on drug name
-  // These will be populated by the backend with real indications
-  if (drugName === "Procainamide") {
-    els.procRow.classList.remove("hidden");
-  } else {
-    els.procRow.classList.add("hidden");
-  }
-  
-  if (drugName === "Vancomycin (IV)") {
-    els.vancoTdmRow.classList.remove("hidden");
-  } else {
-    els.vancoTdmRow.classList.add("hidden");
-  }
-  
-  // Add placeholder indications (will be replaced by backend)
-  const placeholderInds = [
-    "Loading from AI backend...",
-    "Select to query AI for indications"
-  ];
-  
-  placeholderInds.forEach(ind => {
-    const opt = document.createElement("option");
-    opt.value = ind;
-    opt.textContent = ind;
-    els.indication.appendChild(opt);
-  });
+  els.indication.innerHTML = `<option value="">Select indication</option>`;
+  els.indRow.classList.add("hidden");
+
+  els.procRow.classList.add("hidden");
+  els.vancoTdmRow.classList.add("hidden");
+  els.arcRow.classList.add("hidden");
+  els.arcBandField.classList.add("hidden");
+  els.pirrtRow.classList.add("hidden");
+
+  els.indHint.value = "Waiting for indication";
+  els.drugHint.value = "Waiting for backend...";
 }
 
-els.drugSearch.addEventListener("change", () => {
-  const val = els.drugSearch.value.trim();
-  setDrug(val);
-});
+function updateDrugSpecificFields() {
+  els.procRow.classList.toggle("hidden", currentDrug !== "Procainamide");
+  els.vancoTdmRow.classList.toggle("hidden", currentDrug !== "Vancomycin (IV)");
 
-els.indication.addEventListener("change", () => {
-  currentInd = els.indication.value;
-});
+  const allowArc = [
+    "Piperacillin/Tazobactam",
+    "Meropenem",
+    "Levofloxacin",
+    "Ciprofloxacin (IR)"
+  ].includes(currentDrug);
 
-// Send to backend
-async function sendToBackend() {
-  if (!patientReady()) {
-    alert("Please complete all patient fields");
-    return;
+  const onDialysis = els.krt.value !== "none";
+  const severe = els.severity.value === "severe";
+
+  if (allowArc && severe && !onDialysis) {
+    els.arcRow.classList.remove("hidden");
+    if (currentDrug === "Piperacillin/Tazobactam" && els.arc.value === "yes") {
+      els.arcBandField.classList.remove("hidden");
+    } else {
+      els.arcBandField.classList.add("hidden");
+    }
+  } else {
+    els.arcRow.classList.add("hidden");
+    els.arcBandField.classList.add("hidden");
   }
-  
-  if (!currentDrug) {
-    alert("Please select a drug");
-    return;
+
+  if (currentDrug === "Meropenem" && els.krt.value === "pirrt") {
+    els.pirrtRow.classList.remove("hidden");
+  } else {
+    els.pirrtRow.classList.add("hidden");
   }
-  
-  if (!currentInd || currentInd.includes("Loading")) {
-    alert("Please select an indication");
-    return;
+}
+
+function setButtonState(loading) {
+  els.calculateBtn.disabled = loading;
+  els.calculateBtn.textContent = loading ? "Consulting AI..." : "Calculate Dose →";
+}
+
+function resetOutput() {
+  els.doseBox.classList.add("hidden");
+  els.doseBox.innerHTML = "";
+}
+
+async function apiPost(payload) {
+  const response = await fetch("/api/ask", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "API request failed");
   }
-  
-  // Disable button and show loading
-  els.calculateBtn.disabled = true;
-  els.calculateBtn.textContent = "Consulting AI...";
-  
+  return data;
+}
+
+async function loadDrugList() {
+  els.drugSearch.innerHTML = `<option value="">Loading drugs...</option>`;
+
+  try {
+    const data = await apiPost({ action: "get_drugs" });
+
+    if (!data.ok || !Array.isArray(data.drugs)) {
+      throw new Error("Invalid drugs response");
+    }
+
+    els.drugSearch.innerHTML = `<option value="">Select drug</option>`;
+    data.drugs.forEach(drug => {
+      const opt = document.createElement("option");
+      opt.value = drug;
+      opt.textContent = drug;
+      els.drugSearch.appendChild(opt);
+    });
+
+    els.drugHint.value = "Drug list loaded from backend";
+  } catch (error) {
+    els.drugSearch.innerHTML = `<option value="">Unable to load drugs</option>`;
+    els.drugHint.value = "Failed to load drugs";
+    console.error("Drug load error:", error);
+  }
+}
+
+async function loadIndications(drugName) {
+  els.indRow.classList.remove("hidden");
+  els.indication.innerHTML = `<option value="">Loading indications...</option>`;
+  els.indHint.value = "Fetching from AI backend...";
+
+  try {
+    const data = await apiPost({
+      action: "get_indications",
+      drug: drugName
+    });
+
+    if (!data.ok || !Array.isArray(data.indications)) {
+      throw new Error("Invalid indications response");
+    }
+
+    els.indication.innerHTML = `<option value="">Select indication</option>`;
+
+    data.indications.forEach(ind => {
+      const opt = document.createElement("option");
+      opt.value = ind;
+      opt.textContent = ind;
+      els.indication.appendChild(opt);
+    });
+
+    els.indHint.value = data.note || "Indications loaded";
+    els.drugHint.value = data.drug_note || `Backend connected for ${drugName}`;
+  } catch (error) {
+    els.indication.innerHTML = `<option value="">Unable to load indications</option>`;
+    els.indHint.value = "Failed to fetch indications";
+    console.error("Indication load error:", error);
+  }
+}
+
+function renderArraySection(title, items, accent = false) {
+  if (!items || !items.length) return "";
+  return `
+    <div class="divider"></div>
+    <div style="text-transform: uppercase; font-size: 11px; font-weight: 800; color: ${accent ? "var(--accent)" : "var(--muted)"}; margin-bottom: 12px;">
+      ${escapeHtml(title)}
+    </div>
+    <div style="font-size: 14px; color: var(--pri2); line-height: 1.8;">
+      ${items.map(item => `<div>• ${escapeHtml(item)}</div>`).join("")}
+    </div>
+  `;
+}
+
+function displayResult(data) {
+  let html = "";
+
+  if (data.safety) {
+    const safetyClass =
+      data.safety.level === "ok" ? "safety-ok" :
+      data.safety.level === "warn" ? "safety-warn" : "safety-bad";
+
+    html += `<div class="safetyBanner ${safetyClass}">${escapeHtml(data.safety.message || "")}</div>`;
+  }
+
+  html += `
+    <div style="font-size: 20px; font-weight: 800; color: var(--pri); margin-bottom: 4px;">
+      ${escapeHtml(data.drug || currentDrug || "Recommendation")}
+    </div>
+    <div style="font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase;">
+      ${escapeHtml(data.indication || currentInd || "")}
+    </div>
+  `;
+
+  if (data.summary) {
+    html += `<div class="divider"></div><div style="font-size: 14px; color: var(--pri2);">${escapeHtml(data.summary)}</div>`;
+  }
+
+  html += renderArraySection("Dosing Strategy", data.dosing || [], true);
+  html += renderArraySection("Monitoring", data.monitoring || []);
+  html += renderArraySection("Warnings / Precautions", data.warnings || []);
+  html += renderArraySection("Supporting Evidence", data.evidence || []);
+  html += renderArraySection("References", data.references || []);
+
+  if (data.recommendation && !data.dosing?.length) {
+    html += `<div class="divider"></div><div style="white-space: pre-wrap; font-size: 14px;">${escapeHtml(data.recommendation)}</div>`;
+  }
+
   els.doseBox.classList.remove("hidden");
-  els.doseBox.innerHTML = '<div style="text-align: center; padding: 30px;">⏳ Querying Clinical AI and Vector Store...</div>';
-  
-  // Prepare data package
-  const requestData = {
+  els.doseBox.innerHTML = html;
+}
+
+async function calculateDose() {
+  if (!patientReady()) {
+    alert("Please complete all patient fields.");
+    return;
+  }
+
+  if (!currentDrug) {
+    alert("Please select a drug.");
+    return;
+  }
+
+  if (!currentInd) {
+    alert("Please select an indication.");
+    return;
+  }
+
+  setButtonState(true);
+  els.doseBox.classList.remove("hidden");
+  els.doseBox.innerHTML = `<div style="text-align:center; padding: 24px;">⏳ Querying THERAGUARD AI...</div>`;
+
+  const payload = {
+    action: "calculate",
+    question: `Provide patient-specific dosing recommendation for ${currentDrug} for ${currentInd}.`,
+    drug: currentDrug,
+    indication: currentInd,
     patient: {
       age: parseFloat(els.age.value),
       sex: els.sex.value,
@@ -800,203 +870,108 @@ async function sendToBackend() {
       route_preference: els.route.value,
       severity: els.severity.value,
       infusion: els.infusion.value,
-      ...(els.sex.value === "F" && {
-        pregnant: els.pregStatus.value,
-        lactating: els.lactStatus.value
-      })
+      pregnant: els.sex.value === "F" ? els.pregStatus.value : "no",
+      lactating: els.sex.value === "F" ? els.lactStatus.value : "no"
     },
-    drug: {
-      name: currentDrug,
-      indication: currentInd
-    },
-    calculated: {
+    extra: {
       bmi: calcBMI(),
       crcl_tbw: calcCrCl_TBW(),
       ibw: calcIBW(),
-      adjbw: calcAdjBW()
-    },
-    additional: {
-      vanco_trough: els.vancoTrough ? parseFloat(els.vancoTrough.value) || null : null,
-      arc: els.arc ? els.arc.value : "no",
-      arc_band: els.arcBand ? els.arcBand.value : null,
-      pirrt_uo: els.pirrtUO ? els.pirrtUO.value : "no",
-      proc_rate: els.procRate ? parseFloat(els.procRate.value) : null,
-      child_pugh: els.childPugh ? els.childPugh.value : "none"
+      adjbw: calcAdjBW(),
+      vanco_trough: parseFloat(els.vancoTrough.value) || null,
+      arc: els.arc.value,
+      arc_band: els.arcBand.value,
+      pirrt_uo: els.pirrtUO.value,
+      proc_rate: parseFloat(els.procRate.value) || null,
+      child_pugh: els.childPugh.value
     }
   };
-  
+
   try {
-    const response = await fetch('/api/ask', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestData)
-    });
-    
-    const result = await response.json();
-    
-    if (result.success) {
-      displayResult(result);
-    } else {
-      throw new Error(result.error || 'Unknown error');
-    }
+    const data = await apiPost(payload);
+    displayResult(data);
   } catch (error) {
     els.doseBox.innerHTML = `
       <div class="safetyBanner safety-bad">
-        <b>Error:</b> ${error.message}<br>
-        <small>Please check console for details</small>
+        <b>Error:</b> ${escapeHtml(error.message)}
       </div>
     `;
-    console.error('Backend error:', error);
+    console.error("Calculate error:", error);
   } finally {
-    // Re-enable button
-    els.calculateBtn.disabled = false;
-    els.calculateBtn.textContent = "Calculate Dose →";
+    setButtonState(false);
   }
 }
 
-// Display backend response
-function displayResult(data) {
-  let html = '';
-  
-  // Safety banner if present
-  if (data.safety) {
-    const safetyClass = data.safety.level === 'ok' ? 'safety-ok' : 
-                       data.safety.level === 'warn' ? 'safety-warn' : 'safety-bad';
-    html += `<div class="safetyBanner ${safetyClass}">${escapeHtml(data.safety.message)}</div>`;
-  }
-  
-  // Main dose recommendation
-  html += `
-    <div style="font-size: 20px; font-weight: 800; color: var(--pri); margin-bottom: 4px;">
-      ${escapeHtml(data.drug || currentDrug)} Recommendation
-    </div>
-    <div style="font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase;">
-      ${escapeHtml(data.indication || currentInd)}
-    </div>
-    <div class="divider"></div>
-  `;
-  
-  // Dosing section
-  if (data.dosing && data.dosing.length) {
-    html += `<div style="text-transform: uppercase; font-size: 11px; font-weight: 800; color: var(--accent); margin-bottom: 12px;">Dosing Strategy</div>`;
-    html += `<div style="font-size: 16px; font-weight: 600; line-height: 1.8;">`;
-    data.dosing.forEach(line => {
-      html += `<div>${escapeHtml(line)}</div>`;
-    });
-    html += `</div>`;
-  }
-  
-  // Evidence section
-  if (data.evidence && data.evidence.length) {
-    html += `<div class="divider"></div>`;
-    html += `<div style="text-transform: uppercase; font-size: 11px; font-weight: 800; color: var(--muted); margin-bottom: 12px;">Supporting Evidence</div>`;
-    html += `<div style="font-size: 13px; color: var(--pri2);">`;
-    data.evidence.forEach(item => {
-      html += `<div style="margin-bottom: 8px;">• ${escapeHtml(item)}</div>`;
-    });
-    html += `</div>`;
-  }
-  
-  // References
-  if (data.references && data.references.length) {
-    html += `<div class="divider"></div>`;
-    html += `<div style="font-weight:700; font-size:13px; margin-bottom:12px;">📚 References</div>`;
-    data.references.forEach(ref => {
-      html += `<div style="font-size:12px; margin-bottom:4px;">• ${escapeHtml(ref)}</div>`;
-    });
-  }
-  
-  // Raw data for debugging (remove in production)
-  if (data.debug) {
-    html += `<div class="divider"></div>`;
-    html += `<details><summary>Debug Info</summary><pre style="font-size:10px; margin-top:10px;">${JSON.stringify(data, null, 2)}</pre></details>`;
-  }
-  
-  els.doseBox.innerHTML = html;
-}
+function resetForm() {
+  document.querySelectorAll("input").forEach(input => {
+    if (input.type === "number" || input.type === "text") input.value = "";
+  });
 
-// HTML escape helper
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/[&<>"']/g, m => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[m]);
-}
-
-// ARC visibility logic (UI only)
-function updateArcVisibility() {
-  const onDialysis = els.krt.value !== "none";
-  const severe = (els.severity.value === "severe");
-  
-  const allowArc = [
-    "Piperacillin/Tazobactam",
-    "Meropenem",
-    "Levofloxacin",
-    "Ciprofloxacin (IR)"
-  ].includes(currentDrug);
-  
-  if (allowArc && severe && !onDialysis && currentDrug) {
-    els.arcRow.classList.remove("hidden");
-    
-    if (currentDrug === "Piperacillin/Tazobactam" && els.arc.value === "yes") {
-      els.arcBandField.classList.remove("hidden");
-    } else {
-      els.arcBandField.classList.add("hidden");
+  document.querySelectorAll("select").forEach(select => {
+    if (select.id === "drugSearch") {
+      select.value = "";
+    } else if (select.options.length) {
+      select.selectedIndex = 0;
     }
-  } else {
-    els.arcRow.classList.add("hidden");
-    els.arc.value = "no";
-    els.arcBandField.classList.add("hidden");
-  }
-  
-  if (currentDrug === "Meropenem" && els.krt.value === "pirrt" && currentDrug) {
-    els.pirrtRow.classList.remove("hidden");
-  } else {
-    els.pirrtRow.classList.add("hidden");
-    els.pirrtUO.value = "no";
-  }
+  });
+
+  currentDrug = "";
+  currentInd = "";
+
+  updateFemaleFields();
+  updatePatientBox();
+  clearDrugDependentUI();
+  resetOutput();
+  els.s2Badge.textContent = "Configuration";
+  els.s2Badge.style.color = "var(--muted)";
+  loadDrugList();
 }
 
-// Event listeners
+els.drugSearch.addEventListener("change", async () => {
+  currentDrug = els.drugSearch.value;
+  currentInd = "";
+  resetOutput();
+  clearDrugDependentUI();
+
+  if (!currentDrug) {
+    els.s2Badge.textContent = "SELECT";
+    els.s2Badge.style.color = "var(--muted)";
+    return;
+  }
+
+  els.s2Badge.textContent = "SELECTED";
+  els.s2Badge.style.color = "var(--ok)";
+  updateDrugSpecificFields();
+  await loadIndications(currentDrug);
+});
+
+els.indication.addEventListener("change", () => {
+  currentInd = els.indication.value;
+  els.indHint.value = currentInd ? "Indication selected" : "Select indication";
+  resetOutput();
+});
+
 ["input", "change"].forEach(evt => {
-  document.querySelectorAll("#step1 input, #step1 select").forEach(e => {
-    e.addEventListener(evt, () => {
+  document.querySelectorAll("#step1 input, #step1 select").forEach(el => {
+    el.addEventListener(evt, () => {
       updateFemaleFields();
       updatePatientBox();
+      updateDrugSpecificFields();
     });
   });
 });
 
-// Step 2 change listeners
-document.querySelectorAll("#step2 select, #step2 input").forEach(e => {
-  e.addEventListener("change", () => {
-    updateArcVisibility();
-  });
+[els.arc, els.krt, els.severity].forEach(el => {
+  if (el) el.addEventListener("change", updateDrugSpecificFields);
 });
 
-// Vanco trough listener
-if (els.vancoTrough) {
-  els.vancoTrough.addEventListener('input', () => {});
-}
+els.calculateBtn.addEventListener("click", calculateDose);
+els.resetBtn.addEventListener("click", resetForm);
 
-// ARC change listener
-if (els.arc) {
-  els.arc.addEventListener('change', updateArcVisibility);
-}
-
-// Calculate button
-els.calculateBtn.addEventListener('click', sendToBackend);
-
-// Initialize
-rebuildDrugList();
 updateFemaleFields();
 updatePatientBox();
+clearDrugDependentUI();
+loadDrugList();
 </script>
 
 </body>
