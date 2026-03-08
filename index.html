@@ -1,978 +1,330 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>THERAGUARD AI | Clinical Safety Engine</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THERAGUARD AI</title>
+
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-  :root {
-    --pri: #0f172a;
-    --pri2: #1e293b;
-    --accent: #0ea5e9;
-    --accent-soft: rgba(14, 165, 233, 0.1);
-    --bg: #f8fafc;
-    --card: #ffffff;
-    --line: #e2e8f0;
-    --text: #0f172a;
-    --muted: #64748b;
-    --warn: #f59e0b;
-    --bad: #ef4444;
-    --ok: #10b981;
-    --shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02);
-    --radius: 12px;
-  }
+body{
+font-family:Inter,Arial;
+background:#f8fafc;
+margin:0;
+padding:30px;
+}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+.container{
+max-width:1000px;
+margin:auto;
+}
 
-  body {
-    margin: 0;
-    padding: 32px 16px;
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
+.topbar{
+background:#0f172a;
+color:white;
+padding:24px 30px;
+border-radius:14px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+}
 
-  .container { max-width: 1000px; margin: 0 auto; }
+.brand-main{
+font-size:24px;
+font-weight:800;
+}
 
-  .topbar {
-    background: var(--pri);
-    border-radius: 16px;
-    padding: 24px 32px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: #fff;
-    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-  }
+.brand-sub{
+font-size:12px;
+color:#38bdf8;
+letter-spacing:1px;
+margin-top:4px;
+}
 
-  .brand-block { display: flex; flex-direction: column; }
-  .brand-main { font-weight: 800; font-size: 24px; letter-spacing: -0.025em; line-height: 1; }
-  .brand-sub { font-weight: 500; font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
-  .header-center { font-weight: 600; font-size: 12px; color: #fff; background: rgba(255,255,255,0.1); padding: 6px 16px; border-radius: 99px; }
-  .header-right { font-weight: 700; font-size: 13px; color: var(--ok); display: flex; align-items: center; gap: 6px; }
+.header-right{
+font-size:13px;
+font-weight:700;
+background:rgba(255,255,255,0.1);
+padding:8px 14px;
+border-radius:999px;
+}
 
-  .card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 28px;
-    margin-bottom: 20px;
-  }
+.card{
+background:white;
+padding:25px;
+border-radius:12px;
+border:1px solid #e2e8f0;
+margin-bottom:20px;
+}
 
-  .stepTitle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--bg);
-  }
+.grid{
+display:grid;
+grid-template-columns:repeat(12,1fr);
+gap:14px;
+}
 
-  .stepTitle h2 { font-size: 18px; font-weight: 700; color: var(--pri); }
+.field{
+display:flex;
+flex-direction:column;
+}
 
-  .badge {
-    font-size: 11px;
-    padding: 4px 12px;
-    border-radius: 99px;
-    border: 1px solid var(--line);
-    color: var(--muted);
-    background: var(--bg);
-    font-weight: 700;
-    text-transform: uppercase;
-  }
+label{
+font-size:11px;
+font-weight:700;
+color:#64748b;
+margin-bottom:6px;
+}
 
-  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
-  .field { display: flex; flex-direction: column; gap: 8px; }
+input,select{
+height:42px;
+border:1px solid #e2e8f0;
+border-radius:8px;
+padding:0 12px;
+font-size:14px;
+}
 
-  label {
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
+input:focus,select:focus{
+outline:none;
+border-color:#0ea5e9;
+box-shadow:0 0 0 3px rgba(14,165,233,0.15);
+}
 
-  input, select, textarea {
-    height: 44px;
-    padding: 0 14px;
-    border-radius: 8px;
-    border: 1px solid var(--line);
-    outline: none;
-    background: #fff;
-    color: var(--text);
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    width: 100%;
-  }
+.stepTitle{
+display:flex;
+justify-content:space-between;
+margin-bottom:18px;
+}
 
-  textarea {
-    min-height: 110px;
-    height: auto;
-    padding: 14px;
-    resize: vertical;
-  }
+.badge{
+font-size:11px;
+padding:4px 10px;
+border-radius:999px;
+background:#f1f5f9;
+border:1px solid #e2e8f0;
+}
 
-  input:focus, select:focus, textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px var(--accent-soft);
-  }
+.calc-btn-container{
+margin-top:25px;
+display:flex;
+justify-content:flex-end;
+gap:10px;
+}
 
-  input:disabled, textarea:disabled {
-    background: var(--bg);
-    color: var(--muted);
-    cursor: not-allowed;
-    border-style: dashed;
-  }
+button{
+padding:12px 22px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:700;
+}
 
-  .box {
-    background: var(--pri);
-    color: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    margin-top: 20px;
-    font-size: 14px;
-    border: 1px solid var(--pri2);
-  }
+#calculateBtn{
+background:#0f172a;
+color:white;
+}
 
-  .row { display: flex; gap: 10px; flex-wrap: wrap; }
-  .pill {
-    padding: 6px 14px;
-    border-radius: 8px;
-    background: rgba(255,255,255,0.1);
-    font-size: 12px;
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.05);
-  }
-  .pill b { color: var(--accent); margin-right: 4px; }
+#resetBtn{
+background:white;
+border:1px solid #e2e8f0;
+}
 
-  .divider { height: 1px; background: var(--line); margin: 24px 0; }
-  .hidden { display: none !important; }
+.box{
+background:#0f172a;
+color:white;
+padding:16px;
+border-radius:10px;
+margin-top:15px;
+}
 
-  .status-note {
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    padding: 0 14px;
-    border-radius: 8px;
-    border: 1px solid var(--line);
-    background: var(--bg);
-    color: var(--muted);
-    font-size: 14px;
-    font-weight: 500;
-  }
+.footerDisclaimer{
+margin-top:40px;
+text-align:center;
+font-size:12px;
+color:#64748b;
+}
 
-  .safetyBanner {
-    border-radius: 8px;
-    padding: 14px 18px;
-    margin-bottom: 16px;
-    font-size: 13px;
-    font-weight: 500;
-    border-left: 4px solid transparent;
-  }
-  .safety-ok { background: #ecfdf5; color: #065f46; border-left-color: var(--ok); }
-  .safety-warn { background: #fffbeb; color: #92400e; border-left-color: var(--warn); }
-  .safety-bad { background: #fef2f2; color: #991b1b; border-left-color: var(--bad); }
+.footerCredit{
+margin-top:10px;
+font-weight:700;
+}
 
-  #doseBox {
-    background: #fff;
-    color: var(--text);
-    border: 2px solid var(--pri);
-    padding: 24px;
-    border-radius: 12px;
-  }
+@media(max-width:700px){
 
-  .calc-btn-container {
-    margin-top: 24px;
-    text-align: right;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
+.grid{
+grid-template-columns:repeat(1,1fr);
+}
 
-  #calculateBtn, #resetBtn {
-    border: none;
-    padding: 14px 26px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: 0.3px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
+.topbar{
+flex-direction:column;
+gap:10px;
+}
 
-  #calculateBtn {
-    background: var(--pri);
-    color: #fff;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-  }
+}
 
-  #calculateBtn:hover {
-    background: var(--pri2);
-    transform: translateY(-1px);
-  }
-
-  #calculateBtn:disabled,
-  #resetBtn:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  #resetBtn {
-    background: #fff;
-    color: var(--pri);
-    border: 1px solid var(--line);
-  }
-
-  .footerDisclaimer {
-    text-align: center;
-    font-size: 12px;
-    color: var(--muted);
-    margin: 40px 0;
-    padding-top: 24px;
-    border-top: 1px solid var(--line);
-  }
-  .footerCredit {
-    font-weight: 700;
-    color: var(--pri);
-    margin-top: 8px;
-    font-size: 13px;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-  }
-
-  @media (max-width: 980px) {
-    .grid { grid-template-columns: repeat(6, 1fr); }
-  }
-
-  @media (max-width: 620px) {
-    .grid { grid-template-columns: repeat(1, 1fr); }
-    .field { grid-column: span 1 !important; }
-    .topbar { flex-direction: column; text-align: center; gap: 16px; padding: 24px; }
-    .header-right { justify-content: center; }
-    .calc-btn-container { justify-content: stretch; }
-    #calculateBtn, #resetBtn { width: 100%; }
-  }
 </style>
 </head>
+
 <body>
 
 <div class="container">
-  <div class="topbar">
-    <div class="brand-block">
-      <div class="brand-main">THERAGUARD AI</div>
-      <div class="brand-sub">Patient-Specific Clinical Safety Engine</div>
-    </div>
-    <div class="header-center">v3.1.0 Cloud-Native</div>
-    <div class="header-right">● AI BACKEND ACTIVE</div>
-  </div>
 
-  <div class="card" id="step1">
-    <div class="stepTitle">
-      <h2>1 · Patient Profile</h2>
-      <span class="badge" id="s1Badge">Awaiting Input</span>
-    </div>
+<div class="topbar">
 
-    <div class="grid">
-      <div class="field" style="grid-column: span 2;">
-        <label>Age (yrs)</label>
-        <input type="number" id="age" min="18" placeholder="0">
-      </div>
-
-      <div class="field" style="grid-column: span 2;">
-        <label>Sex</label>
-        <select id="sex">
-          <option value=""></option>
-          <option value="M">Male</option>
-          <option value="F">Female</option>
-        </select>
-      </div>
-
-      <div class="field" style="grid-column: span 2;">
-        <label>Weight (kg)</label>
-        <input type="number" id="wt" min="1" step="0.1" placeholder="0.0">
-      </div>
-
-      <div class="field" style="grid-column: span 2;">
-        <label>Height (cm)</label>
-        <input type="number" id="ht" min="1" step="0.1" placeholder="0.0">
-      </div>
-
-      <div class="field" style="grid-column: span 2;">
-        <label>S. Creatinine (µmol/L)</label>
-        <input type="number" id="scr" min="1" step="1" placeholder="0">
-      </div>
-
-      <div class="field" style="grid-column: span 2;">
-        <label>AKI</label>
-        <select id="aki">
-          <option value="no">No</option>
-          <option value="yes">Yes</option>
-        </select>
-      </div>
-
-      <div class="field" style="grid-column: span 3;">
-        <label>Renal Replacement (KRT)</label>
-        <select id="krt">
-          <option value="none">None</option>
-          <option value="ihd">Intermittent HD</option>
-          <option value="pd">Peritoneal dialysis</option>
-          <option value="crrt">CRRT</option>
-          <option value="pirrt">PIRRT / SLED</option>
-        </select>
-      </div>
-
-      <div class="field" style="grid-column: span 3;">
-        <label>Route preference</label>
-        <select id="route">
-          <option value="ivpo">IV/PO</option>
-          <option value="iv">IV</option>
-          <option value="po">PO</option>
-        </select>
-      </div>
-
-      <div class="field" style="grid-column: span 3;">
-        <label>Clinical Severity</label>
-        <select id="severity">
-          <option value="standard">Standard</option>
-          <option value="severe">Severe</option>
-        </select>
-      </div>
-
-      <div class="field" style="grid-column: span 3;">
-        <label>Infusion Strategy</label>
-        <select id="infusion">
-          <option value="traditional">Traditional</option>
-          <option value="extended">Extended</option>
-          <option value="continuous">Continuous</option>
-        </select>
-      </div>
-
-      <div class="field hidden" id="pregField" style="grid-column: span 3;">
-        <label>Pregnancy Status</label>
-        <select id="pregStatus">
-          <option value="no">No</option>
-          <option value="yes">Pregnant</option>
-          <option value="unknown">Unknown</option>
-        </select>
-      </div>
-
-      <div class="field hidden" id="lactField" style="grid-column: span 3;">
-        <label>Lactation Status</label>
-        <select id="lactStatus">
-          <option value="no">No</option>
-          <option value="yes">Breastfeeding</option>
-          <option value="unknown">Unknown</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="box" id="calcBox"></div>
-  </div>
-
-  <div class="card hidden" id="step2">
-    <div class="stepTitle">
-      <h2>2 · Therapeutic Selection</h2>
-      <span class="badge" id="s2Badge">Configuration</span>
-    </div>
-
-    <div class="grid">
-      <div class="field" style="grid-column: span 6;">
-        <label>Drug Selection</label>
-        <select id="drugSearch">
-          <option value="">Loading drugs...</option>
-        </select>
-      </div>
-
-      <div class="field" style="grid-column: span 6;">
-        <label>Clinical Guidance Note</label>
-        <input id="drugHint" disabled value="Waiting for backend...">
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="grid hidden" id="indRow">
-      <div class="field" style="grid-column: span 6;">
-        <label>Indication / Clinical Pathway</label>
-        <select id="indication">
-          <option value="">Select drug first</option>
-        </select>
-      </div>
-      <div class="field" style="grid-column: span 6;">
-        <label>Status</label>
-        <input id="indHint" disabled value="Waiting for indication">
-      </div>
-    </div>
-
-    <div class="grid hidden" id="procRow" style="margin-top:10px">
-      <div class="field" style="grid-column: span 4;">
-        <label>Maintenance Rate (mg/min)</label>
-        <select id="procRate">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3" selected>3</option>
-          <option value="4">4</option>
-        </select>
-      </div>
-      <div class="field" style="grid-column: span 4;">
-        <label>Hepatic Status (Child-Pugh)</label>
-        <select id="childPugh">
-          <option value="none" selected>Normal / Not known</option>
-          <option value="moderate">Moderate (Class B)</option>
-          <option value="severe">Severe (Class C)</option>
-        </select>
-      </div>
-      <div class="field" style="grid-column: span 4;">
-        <label>Auto-Adjustment</label>
-        <input disabled value="Included in backend request">
-      </div>
-    </div>
-
-    <div class="grid hidden" id="vancoTdmRow" style="margin-top:10px">
-      <div class="field" style="grid-column: span 6;">
-        <label>Measured Trough (mg/L)</label>
-        <input type="number" id="vancoTrough" min="0" step="0.1" placeholder="Enter serum level">
-      </div>
-      <div class="field" style="grid-column: span 6;">
-        <label>TDM Engine</label>
-        <input id="vancoTdmHint" disabled value="Included in backend request">
-      </div>
-    </div>
-
-    <div class="grid hidden" id="arcRow" style="margin-top:10px">
-      <div class="field" style="grid-column: span 4;">
-        <label>Augmented Renal Clearance?</label>
-        <select id="arc">
-          <option value="no">No</option>
-          <option value="yes">Yes (ARC suspected)</option>
-        </select>
-      </div>
-      <div class="field hidden" id="arcBandField" style="grid-column: span 8;">
-        <label>Measured CrCl Band (Urinary)</label>
-        <select id="arcBand">
-          <option value="130_170">130 to &lt;170 mL/min</option>
-          <option value="ge170">≥170 mL/min</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="grid hidden" id="pirrtRow" style="margin-top:10px">
-      <div class="field" style="grid-column: span 6;">
-        <label>Residual Diuresis (UO ≥300 mL/day)?</label>
-        <select id="pirrtUO">
-          <option value="no">No</option>
-          <option value="yes">Yes</option>
-        </select>
-      </div>
-      <div class="field" style="grid-column: span 6;">
-        <label>Note</label>
-        <input disabled value="Included in backend request">
-      </div>
-    </div>
-
-    <div class="calc-btn-container">
-      <button id="resetBtn" type="button">Reset</button>
-      <button id="calculateBtn" type="button">Calculate Dose →</button>
-    </div>
-
-    <div class="box hidden" id="doseBox"></div>
-  </div>
-
-  <div class="footerDisclaimer">
-    Advanced Clinical Decision Support System. Use as secondary verification only.
-    <div class="footerCredit">Designed & Innovated by Mohammed Al-Ishaq</div>
-  </div>
+<div>
+<div class="brand-main">THERAGUARD AI</div>
+<div class="brand-sub">Patient-Specific Clinical Safety Engine</div>
 </div>
 
-<script>
-const els = {
-  age: document.getElementById("age"),
-  sex: document.getElementById("sex"),
-  wt: document.getElementById("wt"),
-  ht: document.getElementById("ht"),
-  scr: document.getElementById("scr"),
-  aki: document.getElementById("aki"),
-  krt: document.getElementById("krt"),
-  route: document.getElementById("route"),
-  severity: document.getElementById("severity"),
-  infusion: document.getElementById("infusion"),
-
-  calcBox: document.getElementById("calcBox"),
-  step2: document.getElementById("step2"),
-  s1Badge: document.getElementById("s1Badge"),
-  s2Badge: document.getElementById("s2Badge"),
-
-  drugSearch: document.getElementById("drugSearch"),
-  drugHint: document.getElementById("drugHint"),
-
-  indRow: document.getElementById("indRow"),
-  indication: document.getElementById("indication"),
-  indHint: document.getElementById("indHint"),
-  doseBox: document.getElementById("doseBox"),
-
-  pregField: document.getElementById("pregField"),
-  lactField: document.getElementById("lactField"),
-  pregStatus: document.getElementById("pregStatus"),
-  lactStatus: document.getElementById("lactStatus"),
-
-  vancoTdmRow: document.getElementById("vancoTdmRow"),
-  vancoTrough: document.getElementById("vancoTrough"),
-  vancoTdmHint: document.getElementById("vancoTdmHint"),
-
-  arcRow: document.getElementById("arcRow"),
-  arc: document.getElementById("arc"),
-  arcBandField: document.getElementById("arcBandField"),
-  arcBand: document.getElementById("arcBand"),
-
-  pirrtRow: document.getElementById("pirrtRow"),
-  pirrtUO: document.getElementById("pirrtUO"),
-
-  procRow: document.getElementById("procRow"),
-  procRate: document.getElementById("procRate"),
-  childPugh: document.getElementById("childPugh"),
-
-  calculateBtn: document.getElementById("calculateBtn"),
-  resetBtn: document.getElementById("resetBtn")
-};
-
-let currentDrug = "";
-let currentInd = "";
-
-function round1(x) { return Math.round(x * 10) / 10; }
-
-function escapeHtml(str) {
-  if (!str) return "";
-  return String(str).replace(/[&<>"']/g, m => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[m]);
-}
-
-function calcIBW() {
-  const htCm = parseFloat(els.ht.value);
-  const sex = els.sex.value;
-  if (!htCm || !sex) return null;
-  const htIn = htCm / 2.54;
-  const base = (sex === "M") ? 50 : 45.5;
-  return base + 2.3 * (htIn - 60);
-}
-
-function calcAdjBW() {
-  const wt = parseFloat(els.wt.value);
-  const ibw = calcIBW();
-  if (!wt || !ibw) return null;
-  return wt <= ibw ? wt : ibw + 0.4 * (wt - ibw);
-}
-
-function calcBMI() {
-  const h = parseFloat(els.ht.value) / 100;
-  const w = parseFloat(els.wt.value);
-  if (!h || !w) return null;
-  return w / (h * h);
-}
-
-function calcCrCl(weightKg) {
-  const age = parseFloat(els.age.value);
-  const scr_umol = parseFloat(els.scr.value);
-  const sex = els.sex.value;
-  if (!age || !weightKg || !scr_umol || !sex) return null;
-  const scr_mgdl = scr_umol / 88.4;
-  let crcl = ((140 - age) * weightKg) / (72 * scr_mgdl);
-  if (sex === "F") crcl *= 0.85;
-  return crcl;
-}
-
-function calcCrCl_TBW() {
-  const wt = parseFloat(els.wt.value);
-  return wt ? calcCrCl(wt) : null;
-}
-
-function patientReady() {
-  return !!(
-    parseFloat(els.age.value) &&
-    parseFloat(els.wt.value) &&
-    parseFloat(els.ht.value) &&
-    parseFloat(els.scr.value) &&
-    els.sex.value
-  );
-}
-
-function updateFemaleFields() {
-  const isF = (els.sex.value === "F");
-  if (isF) {
-    els.pregField.classList.remove("hidden");
-    els.lactField.classList.remove("hidden");
-  } else {
-    els.pregField.classList.add("hidden");
-    els.lactField.classList.add("hidden");
-    els.pregStatus.value = "no";
-    els.lactStatus.value = "no";
-  }
-}
-
-function updatePatientBox() {
-  if (!patientReady()) {
-    els.s1Badge.textContent = "REQUIRED";
-    els.s1Badge.style.color = "var(--muted)";
-    els.step2.classList.add("hidden");
-    els.calcBox.innerHTML = "";
-    return;
-  }
-
-  const bmi = calcBMI();
-  const crcl = calcCrCl_TBW();
-  const ibw = calcIBW();
-  const adj = calcAdjBW();
-  const krt = els.krt.value;
-
-  const pills = [];
-  if (bmi) pills.push(`<span class="pill"><b>BMI</b>${round1(bmi)}</span>`);
-  if (crcl) pills.push(`<span class="pill"><b>CrCl</b>${round1(crcl)} mL/min</span>`);
-  if (ibw) pills.push(`<span class="pill"><b>IBW</b>${round1(ibw)} kg</span>`);
-  if (adj) pills.push(`<span class="pill"><b>AdjBW</b>${round1(adj)} kg</span>`);
-  pills.push(`<span class="pill"><b>KRT</b>${escapeHtml(krt.toUpperCase())}</span>`);
-
-  els.calcBox.innerHTML = `<div class="row">${pills.join("")}</div>`;
-  els.step2.classList.remove("hidden");
-  els.s1Badge.textContent = "READY";
-  els.s1Badge.style.color = "var(--ok)";
-}
-
-function clearDrugDependentUI() {
-  currentInd = "";
-  els.indication.innerHTML = `<option value="">Select indication</option>`;
-  els.indRow.classList.add("hidden");
-
-  els.procRow.classList.add("hidden");
-  els.vancoTdmRow.classList.add("hidden");
-  els.arcRow.classList.add("hidden");
-  els.arcBandField.classList.add("hidden");
-  els.pirrtRow.classList.add("hidden");
-
-  els.indHint.value = "Waiting for indication";
-  els.drugHint.value = "Waiting for backend...";
-}
-
-function updateDrugSpecificFields() {
-  els.procRow.classList.toggle("hidden", currentDrug !== "Procainamide");
-  els.vancoTdmRow.classList.toggle("hidden", currentDrug !== "Vancomycin (IV)");
-
-  const allowArc = [
-    "Piperacillin/Tazobactam",
-    "Meropenem",
-    "Levofloxacin",
-    "Ciprofloxacin (IR)"
-  ].includes(currentDrug);
-
-  const onDialysis = els.krt.value !== "none";
-  const severe = els.severity.value === "severe";
-
-  if (allowArc && severe && !onDialysis) {
-    els.arcRow.classList.remove("hidden");
-    if (currentDrug === "Piperacillin/Tazobactam" && els.arc.value === "yes") {
-      els.arcBandField.classList.remove("hidden");
-    } else {
-      els.arcBandField.classList.add("hidden");
-    }
-  } else {
-    els.arcRow.classList.add("hidden");
-    els.arcBandField.classList.add("hidden");
-  }
-
-  if (currentDrug === "Meropenem" && els.krt.value === "pirrt") {
-    els.pirrtRow.classList.remove("hidden");
-  } else {
-    els.pirrtRow.classList.add("hidden");
-  }
-}
-
-function setButtonState(loading) {
-  els.calculateBtn.disabled = loading;
-  els.calculateBtn.textContent = loading ? "Consulting AI..." : "Calculate Dose →";
-}
-
-function resetOutput() {
-  els.doseBox.classList.add("hidden");
-  els.doseBox.innerHTML = "";
-}
-
-async function apiPost(payload) {
-  const response = await fetch("/api/ask", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
-
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error || "API request failed");
-  }
-  return data;
-}
-
-async function loadDrugList() {
-  els.drugSearch.innerHTML = `<option value="">Loading drugs...</option>`;
-
-  try {
-    const data = await apiPost({ action: "get_drugs" });
-
-    if (!data.ok || !Array.isArray(data.drugs)) {
-      throw new Error("Invalid drugs response");
-    }
-
-    els.drugSearch.innerHTML = `<option value="">Select drug</option>`;
-    data.drugs.forEach(drug => {
-      const opt = document.createElement("option");
-      opt.value = drug;
-      opt.textContent = drug;
-      els.drugSearch.appendChild(opt);
-    });
-
-    els.drugHint.value = "Drug list loaded from backend";
-  } catch (error) {
-    els.drugSearch.innerHTML = `<option value="">Unable to load drugs</option>`;
-    els.drugHint.value = "Failed to load drugs";
-    console.error("Drug load error:", error);
-  }
-}
-
-async function loadIndications(drugName) {
-  els.indRow.classList.remove("hidden");
-  els.indication.innerHTML = `<option value="">Loading indications...</option>`;
-  els.indHint.value = "Fetching from AI backend...";
-
-  try {
-    const data = await apiPost({
-      action: "get_indications",
-      drug: drugName
-    });
-
-    if (!data.ok || !Array.isArray(data.indications)) {
-      throw new Error("Invalid indications response");
-    }
-
-    els.indication.innerHTML = `<option value="">Select indication</option>`;
-
-    data.indications.forEach(ind => {
-      const opt = document.createElement("option");
-      opt.value = ind;
-      opt.textContent = ind;
-      els.indication.appendChild(opt);
-    });
-
-    els.indHint.value = data.note || "Indications loaded";
-    els.drugHint.value = data.drug_note || `Backend connected for ${drugName}`;
-  } catch (error) {
-    els.indication.innerHTML = `<option value="">Unable to load indications</option>`;
-    els.indHint.value = "Failed to fetch indications";
-    console.error("Indication load error:", error);
-  }
-}
-
-function renderArraySection(title, items, accent = false) {
-  if (!items || !items.length) return "";
-  return `
-    <div class="divider"></div>
-    <div style="text-transform: uppercase; font-size: 11px; font-weight: 800; color: ${accent ? "var(--accent)" : "var(--muted)"}; margin-bottom: 12px;">
-      ${escapeHtml(title)}
-    </div>
-    <div style="font-size: 14px; color: var(--pri2); line-height: 1.8;">
-      ${items.map(item => `<div>• ${escapeHtml(item)}</div>`).join("")}
-    </div>
-  `;
-}
-
-function displayResult(data) {
-  let html = "";
-
-  if (data.safety) {
-    const safetyClass =
-      data.safety.level === "ok" ? "safety-ok" :
-      data.safety.level === "warn" ? "safety-warn" : "safety-bad";
-
-    html += `<div class="safetyBanner ${safetyClass}">${escapeHtml(data.safety.message || "")}</div>`;
-  }
-
-  html += `
-    <div style="font-size: 20px; font-weight: 800; color: var(--pri); margin-bottom: 4px;">
-      ${escapeHtml(data.drug || currentDrug || "Recommendation")}
-    </div>
-    <div style="font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase;">
-      ${escapeHtml(data.indication || currentInd || "")}
-    </div>
-  `;
-
-  if (data.summary) {
-    html += `<div class="divider"></div><div style="font-size: 14px; color: var(--pri2);">${escapeHtml(data.summary)}</div>`;
-  }
-
-  html += renderArraySection("Dosing Strategy", data.dosing || [], true);
-  html += renderArraySection("Monitoring", data.monitoring || []);
-  html += renderArraySection("Warnings / Precautions", data.warnings || []);
-  html += renderArraySection("Supporting Evidence", data.evidence || []);
-  html += renderArraySection("References", data.references || []);
-
-  if (data.recommendation && !data.dosing?.length) {
-    html += `<div class="divider"></div><div style="white-space: pre-wrap; font-size: 14px;">${escapeHtml(data.recommendation)}</div>`;
-  }
-
-  els.doseBox.classList.remove("hidden");
-  els.doseBox.innerHTML = html;
-}
-
-async function calculateDose() {
-  if (!patientReady()) {
-    alert("Please complete all patient fields.");
-    return;
-  }
-
-  if (!currentDrug) {
-    alert("Please select a drug.");
-    return;
-  }
-
-  if (!currentInd) {
-    alert("Please select an indication.");
-    return;
-  }
-
-  setButtonState(true);
-  els.doseBox.classList.remove("hidden");
-  els.doseBox.innerHTML = `<div style="text-align:center; padding: 24px;">⏳ Querying THERAGUARD AI...</div>`;
-
-  const payload = {
-    action: "calculate",
-    question: `Provide patient-specific dosing recommendation for ${currentDrug} for ${currentInd}.`,
-    drug: currentDrug,
-    indication: currentInd,
-    patient: {
-      age: parseFloat(els.age.value),
-      sex: els.sex.value,
-      weight: parseFloat(els.wt.value),
-      height: parseFloat(els.ht.value),
-      creatinine: parseFloat(els.scr.value),
-      aki: els.aki.value,
-      krt: els.krt.value,
-      route_preference: els.route.value,
-      severity: els.severity.value,
-      infusion: els.infusion.value,
-      pregnant: els.sex.value === "F" ? els.pregStatus.value : "no",
-      lactating: els.sex.value === "F" ? els.lactStatus.value : "no"
-    },
-    extra: {
-      bmi: calcBMI(),
-      crcl_tbw: calcCrCl_TBW(),
-      ibw: calcIBW(),
-      adjbw: calcAdjBW(),
-      vanco_trough: parseFloat(els.vancoTrough.value) || null,
-      arc: els.arc.value,
-      arc_band: els.arcBand.value,
-      pirrt_uo: els.pirrtUO.value,
-      proc_rate: parseFloat(els.procRate.value) || null,
-      child_pugh: els.childPugh.value
-    }
-  };
-
-  try {
-    const data = await apiPost(payload);
-    displayResult(data);
-  } catch (error) {
-    els.doseBox.innerHTML = `
-      <div class="safetyBanner safety-bad">
-        <b>Error:</b> ${escapeHtml(error.message)}
-      </div>
-    `;
-    console.error("Calculate error:", error);
-  } finally {
-    setButtonState(false);
-  }
-}
-
-function resetForm() {
-  document.querySelectorAll("input").forEach(input => {
-    if (input.type === "number" || input.type === "text") input.value = "";
-  });
-
-  document.querySelectorAll("select").forEach(select => {
-    if (select.id === "drugSearch") {
-      select.value = "";
-    } else if (select.options.length) {
-      select.selectedIndex = 0;
-    }
-  });
-
-  currentDrug = "";
-  currentInd = "";
-
-  updateFemaleFields();
-  updatePatientBox();
-  clearDrugDependentUI();
-  resetOutput();
-  els.s2Badge.textContent = "Configuration";
-  els.s2Badge.style.color = "var(--muted)";
-  loadDrugList();
-}
-
-els.drugSearch.addEventListener("change", async () => {
-  currentDrug = els.drugSearch.value;
-  currentInd = "";
-  resetOutput();
-  clearDrugDependentUI();
-
-  if (!currentDrug) {
-    els.s2Badge.textContent = "SELECT";
-    els.s2Badge.style.color = "var(--muted)";
-    return;
-  }
-
-  els.s2Badge.textContent = "SELECTED";
-  els.s2Badge.style.color = "var(--ok)";
-  updateDrugSpecificFields();
-  await loadIndications(currentDrug);
-});
-
-els.indication.addEventListener("change", () => {
-  currentInd = els.indication.value;
-  els.indHint.value = currentInd ? "Indication selected" : "Select indication";
-  resetOutput();
-});
-
-["input", "change"].forEach(evt => {
-  document.querySelectorAll("#step1 input, #step1 select").forEach(el => {
-    el.addEventListener(evt, () => {
-      updateFemaleFields();
-      updatePatientBox();
-      updateDrugSpecificFields();
-    });
-  });
-});
-
-[els.arc, els.krt, els.severity].forEach(el => {
-  if (el) el.addEventListener("change", updateDrugSpecificFields);
-});
-
-els.calculateBtn.addEventListener("click", calculateDose);
-els.resetBtn.addEventListener("click", resetForm);
-
-updateFemaleFields();
-updatePatientBox();
-clearDrugDependentUI();
-loadDrugList();
-</script>
+<div class="header-right">
+Designed & Innovated by Mohammed Al-Ishaq
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="stepTitle">
+<h3>Patient Profile</h3>
+<span class="badge">Input</span>
+</div>
+
+<div class="grid">
+
+<div class="field" style="grid-column:span 2;">
+<label>Age</label>
+<input id="age" type="number">
+</div>
+
+<div class="field" style="grid-column:span 2;">
+<label>Sex</label>
+<select id="sex">
+<option value=""></option>
+<option value="M">Male</option>
+<option value="F">Female</option>
+</select>
+</div>
+
+<div class="field" style="grid-column:span 2;">
+<label>Weight (kg)</label>
+<input id="wt" type="number">
+</div>
+
+<div class="field" style="grid-column:span 2;">
+<label>Height (cm)</label>
+<input id="ht" type="number">
+</div>
+
+<div class="field" style="grid-column:span 2;">
+<label>Creatinine (µmol/L)</label>
+<input id="scr" type="number">
+</div>
+
+<div class="field" style="grid-column:span 2;">
+<label>AKI</label>
+<select id="aki">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+</div>
+
+<div class="field" style="grid-column:span 3;">
+<label>Renal Replacement</label>
+<select id="krt">
+<option value="none">None</option>
+<option value="ihd">IHD</option>
+<option value="crrt">CRRT</option>
+<option value="pirrt">PIRRT</option>
+<option value="pd">PD</option>
+</select>
+</div>
+
+<div class="field" style="grid-column:span 3;">
+<label>Route</label>
+<select id="route">
+<option value="ivpo">IV/PO</option>
+<option value="iv">IV</option>
+<option value="po">PO</option>
+</select>
+</div>
+
+<div class="field" style="grid-column:span 3;">
+<label>Severity</label>
+<select id="severity">
+<option value="standard">Standard</option>
+<option value="severe">Severe</option>
+</select>
+</div>
+
+<div class="field" style="grid-column:span 3;">
+<label>Infusion Strategy</label>
+<select id="infusion">
+<option value="traditional">Traditional</option>
+<option value="extended">Extended</option>
+<option value="continuous">Continuous</option>
+</select>
+</div>
+
+</div>
+
+<div class="box" id="calcBox">
+Patient metrics will appear here
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="stepTitle">
+<h3>Therapeutic Selection</h3>
+<span class="badge">Select</span>
+</div>
+
+<div class="grid">
+
+<div class="field" style="grid-column:span 6;">
+<label>Drug</label>
+<select id="drugSearch">
+<option>Loading drugs...</option>
+</select>
+</div>
+
+<div class="field" style="grid-column:span 6;">
+<label>Indication</label>
+<select id="indication">
+<option>Select drug first</option>
+</select>
+</div>
+
+</div>
+
+<div class="calc-btn-container">
+
+<button id="resetBtn">Reset</button>
+
+<button id="calculateBtn">
+Calculate Dose
+</button>
+
+</div>
+
+<div class="box" id="doseBox" style="display:none"></div>
+
+</div>
+
+
+<div class="footerDisclaimer">
+Clinical decision support tool. Always verify with institutional protocol.
+
+<div class="footerCredit">
+Designed & Innovated by Mohammed Al-Ishaq
+</div>
+
+</div>
+
+</div>
 
 </body>
 </html>
