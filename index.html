@@ -1,418 +1,1027 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediVance AI</title>
+  <style>
+    :root{
+      --bg:#f4f6f9;
+      --card:#ffffff;
+      --line:#d9e0e7;
+      --text:#233043;
+      --muted:#6b7a90;
 
-<title>MediVance AI</title>
+      --blue:#4f93c9;
+      --blue-dark:#2f6f9f;
+      --blue-soft:#eaf3fb;
 
-<style>
+      --green:#89b697;
+      --green-dark:#5f8f70;
+      --green-soft:#eef7f1;
 
-body{
-font-family:Inter,Arial;
-background:#f6f8fb;
-margin:0;
-padding:30px;
-color:#0f172a
-}
+      --navy:#0d2340;
+      --btn:#2f7ec7;
+      --btn-dark:#1f65a4;
+      --shadow:0 2px 8px rgba(0,0,0,.05);
+      --radius:8px;
+    }
 
-.container{
-max-width:1100px;
-margin:auto
-}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Arial, Helvetica, sans-serif;
+      padding:12px;
+    }
 
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:25px
-}
+    .app{
+      max-width:1100px;
+      margin:0 auto;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:10px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
 
-.brand{
-font-size:26px;
-font-weight:800
-}
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 18px;
+      border-bottom:1px solid var(--line);
+      background:#fff;
+    }
 
-.credit{
-font-size:13px;
-font-weight:600
-}
+    .brand-wrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
 
-.card{
-background:white;
-border-radius:10px;
-padding:20px;
-margin-bottom:20px;
-border:1px solid #e2e8f0
-}
+    .logo-box{
+      width:32px;
+      height:32px;
+      border-radius:6px;
+      background:linear-gradient(135deg,#6cc17a,#3f8fcb);
+      position:relative;
+      flex:0 0 32px;
+    }
 
-.title{
-font-weight:700;
-margin-bottom:15px
-}
+    .logo-box::before{
+      content:"";
+      position:absolute;
+      inset:7px 12px 7px 12px;
+      background:#fff;
+      clip-path:polygon(35% 0,65% 0,65% 35%,100% 35%,100% 65%,65% 65%,65% 100%,35% 100%,35% 65%,0 65%,0 35%,35% 35%);
+    }
 
-.grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:12px
-}
+    .brand-title{
+      font-size:18px;
+      font-weight:700;
+      color:#2e8bb4;
+      line-height:1.1;
+    }
 
-input,select{
-padding:10px;
-border-radius:6px;
-border:1px solid #cbd5e1
-}
+    .brand-sub{
+      font-size:10px;
+      color:var(--muted);
+      margin-top:2px;
+    }
 
-button{
-padding:10px 16px;
-border:none;
-border-radius:6px;
-background:#0f172a;
-color:white;
-font-weight:600;
-cursor:pointer
-}
+    .credit{
+      font-size:12px;
+      color:#666;
+      font-weight:600;
+      text-align:right;
+    }
 
-button.secondary{
-background:#64748b
-}
+    .content{
+      padding:14px;
+      background:#f8fafc;
+    }
 
-.medication{
-border:1px dashed #cbd5e1;
-padding:12px;
-border-radius:8px;
-margin-bottom:10px
-}
+    .section{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:4px;
+      margin-bottom:14px;
+      overflow:hidden;
+    }
 
-.answer{
-background:#f1f5f9;
-padding:15px;
-border-radius:8px;
-margin-top:15px
-}
+    .section-bar{
+      height:28px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 10px;
+      font-weight:700;
+      color:#fff;
+      font-size:14px;
+    }
 
-.quote{
-background:white;
-border-left:4px solid #0ea5e9;
-padding:10px;
-margin-top:10px
-}
+    .bar-blue{background:linear-gradient(90deg,var(--blue),#6ba6d3)}
+    .bar-green{background:linear-gradient(90deg,var(--green),#9cc7aa)}
+    .bar-navy{background:linear-gradient(90deg,var(--navy),#27476f)}
 
-</style>
+    .status-pill{
+      font-size:11px;
+      background:rgba(255,255,255,.85);
+      color:#4d5969;
+      border:1px solid rgba(0,0,0,.08);
+      padding:4px 10px;
+      border-radius:3px;
+      font-weight:700;
+    }
+
+    .section-body{
+      padding:14px;
+    }
+
+    .grid-6{
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      gap:12px;
+    }
+
+    .grid-4{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    label{
+      font-size:12px;
+      font-weight:700;
+      color:#5c6a7f;
+    }
+
+    .input-wrap{
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    input, select, textarea{
+      width:100%;
+      min-width:0;
+      border:1px solid #cfd7e2;
+      border-radius:4px;
+      background:#fff;
+      color:#222;
+      font-size:14px;
+      padding:9px 10px;
+      outline:none;
+    }
+
+    input:focus, select:focus, textarea:focus{
+      border-color:var(--btn);
+      box-shadow:0 0 0 3px rgba(47,126,199,.12);
+    }
+
+    .unit{
+      width:72px;
+      flex:0 0 72px;
+      text-align:center;
+      background:#f5f7fa;
+      color:#69778d;
+      border:1px solid #cfd7e2;
+      border-radius:4px;
+      padding:9px 6px;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .metrics-box{
+      margin-top:10px;
+      background:#edf4fb;
+      border:1px solid #d7e5f3;
+      color:#45627f;
+      border-radius:3px;
+      padding:10px 12px;
+      font-size:13px;
+    }
+
+    .metrics-box b{
+      color:#27476f;
+    }
+
+    .medication-row{
+      border:1px dashed #d4dce7;
+      border-radius:6px;
+      padding:10px;
+      margin-bottom:10px;
+      background:#fcfdff;
+    }
+
+    .med-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:8px;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .med-grid{
+      display:grid;
+      grid-template-columns:2.1fr 2.2fr 1fr 1fr 1fr auto;
+      gap:10px;
+      align-items:end;
+    }
+
+    .btn-row{
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:none;
+      border-radius:4px;
+      padding:9px 16px;
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .btn-primary{
+      background:var(--btn);
+      color:#fff;
+    }
+
+    .btn-primary:hover{background:var(--btn-dark)}
+
+    .btn-secondary{
+      background:#f4f6f8;
+      color:#4f5e72;
+      border:1px solid #d5dde7;
+    }
+
+    .btn-danger{
+      background:#f8eaea;
+      color:#9d3b3b;
+      border:1px solid #efc8c8;
+      padding:9px 12px;
+    }
+
+    .review-box, .qa-box{
+      margin-top:10px;
+      background:#f8fbfe;
+      border:1px solid #dbe8f4;
+      border-radius:4px;
+      padding:12px;
+      min-height:60px;
+    }
+
+    .review-card{
+      border:1px solid #d9e2ec;
+      border-radius:6px;
+      background:#fff;
+      padding:12px;
+      margin-bottom:10px;
+    }
+
+    .review-card h4{
+      margin:0 0 8px;
+      color:#1f4166;
+      font-size:15px;
+    }
+
+    .review-line{
+      font-size:13px;
+      margin:4px 0;
+    }
+
+    .review-line b{
+      color:#334e68;
+    }
+
+    .warn-list{
+      margin-top:10px;
+      padding:10px;
+      background:#fff7e8;
+      border:1px solid #f0d49e;
+      border-radius:6px;
+    }
+
+    .qa-answer{
+      font-size:14px;
+      line-height:1.6;
+      color:#223;
+      margin-bottom:10px;
+    }
+
+    .quote{
+      background:#fff;
+      border-left:4px solid var(--btn);
+      padding:10px 12px;
+      margin-bottom:8px;
+      border-radius:4px;
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .quote-source{
+      margin-top:6px;
+      color:#64748b;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .footer{
+      text-align:center;
+      padding:12px 16px 16px;
+      color:#7b8798;
+      font-size:11px;
+    }
+
+    .footer .credit2{
+      margin-top:8px;
+      font-weight:700;
+      color:#5e6c80;
+    }
+
+    .hidden{display:none !important}
+
+    .loading{
+      color:#6b7a90;
+      font-style:italic;
+    }
+
+    @media (max-width: 980px){
+      .grid-6{grid-template-columns:repeat(2,1fr)}
+      .grid-4{grid-template-columns:repeat(2,1fr)}
+      .med-grid{grid-template-columns:1fr}
+      .credit{display:none}
+    }
+
+    @media (max-width: 640px){
+      .topbar{flex-direction:column; align-items:flex-start; gap:8px}
+      .grid-6, .grid-4{grid-template-columns:1fr}
+      .btn-row{justify-content:stretch}
+      .btn-row button{width:100%}
+    }
+  </style>
 </head>
-
 <body>
-
-<div class="container">
-
-<div class="header">
-<div class="brand">MediVance AI</div>
-<div class="credit">Designed & Innovated by Mohammed Al-Ishaq</div>
-</div>
-
-
-<!-- PATIENT PROFILE -->
-
-<div class="card">
-
-<div class="title">Patient Profile</div>
-
-<div class="grid">
-
-<input id="age" placeholder="Age">
-
-<select id="sex">
-<option value="">Sex</option>
-<option value="M">Male</option>
-<option value="F">Female</option>
-</select>
-
-<input id="weight" placeholder="Weight kg">
-
-<input id="height" placeholder="Height cm">
-
-<input id="scr" placeholder="Creatinine µmol">
-
-<select id="krt">
-<option value="none">No Dialysis</option>
-<option value="ihd">HD</option>
-<option value="crrt">CRRT</option>
-<option value="pirrt">PIRRT</option>
-</select>
-
-</div>
-
-</div>
-
-
-
-<!-- MEDICATION LIST -->
-
-<div class="card">
-
-<div class="title">Medication List</div>
-
-<div id="medications"></div>
-
-<button onclick="addMedication()">Add Drug</button>
-
-</div>
-
-
-
-<!-- RUN REVIEW -->
-
-<div class="card">
-
-<button onclick="runReview()">Run Medication Review</button>
-
-<div id="reviewResult" class="answer"></div>
-
-</div>
-
-
-
-<!-- DRUG KNOWLEDGE -->
-
-<div class="card">
-
-<div class="title">Drug Knowledge Assistant</div>
-
-<select id="questionDrug"></select>
-
-<input id="questionText" placeholder="Ask anything about the drug">
-
-<button onclick="askDrug()">Ask</button>
-
-<div id="questionResult" class="answer"></div>
-
-</div>
-
-
-</div>
-
-
-
-<script>
-
-let drugList=[]
-let medCount=0
-
-
-async function loadDrugs(){
-
-const res=await fetch('/api/ask',{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({action:'get_drugs'})
-})
-
-const data=await res.json()
-
-drugList=data.drugs||[]
-
-populateDrugSelectors()
-
-}
-
-
-function populateDrugSelectors(){
-
-const q=document.getElementById("questionDrug")
-
-q.innerHTML=''
-
-drugList.forEach(d=>{
-
-let opt=document.createElement("option")
-
-opt.value=d
-opt.textContent=d
-
-q.appendChild(opt)
-
-})
-
-}
-
-
-function addMedication(){
-
-medCount++
-
-const div=document.createElement("div")
-
-div.className="medication"
-
-div.innerHTML=`
-
-<select class="drug"></select>
-
-<input class="indication" placeholder="Indication">
-
-<input class="dose" placeholder="Current Dose">
-
-<input class="freq" placeholder="Frequency">
-
-<input class="route" placeholder="Route">
-
-`
-
-document.getElementById("medications").appendChild(div)
-
-const select=div.querySelector(".drug")
-
-drugList.forEach(d=>{
-
-let opt=document.createElement("option")
-
-opt.value=d
-opt.textContent=d
-
-select.appendChild(opt)
-
-})
-
-}
-
-
-
-async function runReview(){
-
-const patient={
-
-age:Number(age.value),
-sex:sex.value,
-weight:Number(weight.value),
-height:Number(height.value),
-creatinine:Number(scr.value),
-krt:krt.value
-
-}
-
-
-let medications=[]
-
-document.querySelectorAll(".medication").forEach(m=>{
-
-medications.push({
-
-drug:m.querySelector(".drug").value,
-indication:m.querySelector(".indication").value,
-current_dose:m.querySelector(".dose").value,
-frequency:m.querySelector(".freq").value,
-route:m.querySelector(".route").value
-
-})
-
-})
-
-
-const res=await fetch('/api/ask',{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-action:'calculate_review',
-patient,
-medications
-})
-})
-
-const data=await res.json()
-
-renderReview(data)
-
-}
-
-
-
-function renderReview(data){
-
-let html=''
-
-data.medication_review.forEach(r=>{
-
-html+=`<h3>${r.drug}</h3>`
-
-html+=`<p><b>Assessment:</b> ${r.assessment}</p>`
-
-html+=`<p><b>Recommended:</b> ${r.recommended_regimen}</p>`
-
-if(r.monitoring?.length){
-
-html+=`<p><b>Monitoring:</b> ${r.monitoring.join(", ")}</p>`
-
-}
-
-if(r.warnings?.length){
-
-html+=`<p><b>Warnings:</b> ${r.warnings.join(", ")}</p>`
-
-}
-
-})
-
-if(data.global_warnings?.length){
-
-html+=`<h3>Global Warnings</h3>`
-
-data.global_warnings.forEach(w=>{
-
-html+=`<p>⚠ ${w}</p>`
-
-})
-
-}
-
-reviewResult.innerHTML=html
-
-}
-
-
-
-async function askDrug(){
-
-const drug=questionDrug.value
-
-const question=questionText.value
-
-const res=await fetch('/api/ask',{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-action:'drug_question',
-drug,
-question
-})
-})
-
-const data=await res.json()
-
-let html=`<h3>Answer</h3><p>${data.answer}</p>`
-
-if(data.evidence){
-
-html+=`<h3>Evidence</h3>`
-
-data.evidence.forEach(e=>{
-
-html+=`<div class="quote">"${e.quote}"<br><small>${e.source}</small></div>`
-
-})
-
-}
-
-questionResult.innerHTML=html
-
-}
-
-
-
-loadDrugs()
-
-addMedication()
-
-</script>
-
+  <div class="app">
+    <div class="topbar">
+      <div class="brand-wrap">
+        <div class="logo-box"></div>
+        <div>
+          <div class="brand-title">MediVance AI</div>
+          <div class="brand-sub">Patient-Specific Clinical Safety Engine</div>
+        </div>
+      </div>
+      <div class="credit">Designed &amp; Innovated by Mohammed Al-Ishaq</div>
+    </div>
+
+    <div class="content">
+      <!-- Patient Profile -->
+      <div class="section" id="step1">
+        <div class="section-bar bar-blue">
+          <div>Patient Profile</div>
+          <div class="status-pill" id="patientStatus">Awaiting Input</div>
+        </div>
+        <div class="section-body">
+          <div class="grid-6">
+            <div class="field">
+              <label>Age</label>
+              <div class="input-wrap">
+                <input id="age" type="number" min="0" placeholder="">
+                <div class="unit">years</div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Sex</label>
+              <select id="sex">
+                <option value="">Select</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Weight</label>
+              <div class="input-wrap">
+                <input id="weight" type="number" step="0.1" min="0" placeholder="">
+                <div class="unit">kg</div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Height</label>
+              <div class="input-wrap">
+                <input id="height" type="number" step="0.1" min="0" placeholder="">
+                <div class="unit">cm</div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Creatinine</label>
+              <div class="input-wrap">
+                <input id="scr" type="number" step="0.1" min="0" placeholder="">
+                <div class="unit">µmol/L</div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>AKI</label>
+              <select id="aki">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Renal Replacement</label>
+              <select id="krt">
+                <option value="none">None</option>
+                <option value="ihd">Intermittent HD</option>
+                <option value="pd">Peritoneal dialysis</option>
+                <option value="crrt">CRRT</option>
+                <option value="pirrt">PIRRT / SLED</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Route</label>
+              <select id="routePref">
+                <option value="ivpo">IV/PO</option>
+                <option value="iv">IV</option>
+                <option value="po">PO</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Severity</label>
+              <select id="severity">
+                <option value="standard">Standard</option>
+                <option value="severe">Severe</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Infusion Strategy</label>
+              <select id="infusion">
+                <option value="traditional">Traditional</option>
+                <option value="extended">Extended</option>
+                <option value="continuous">Continuous</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="metrics-box" id="calcBox">
+            Patient metrics will be displayed here.
+          </div>
+        </div>
+      </div>
+
+      <!-- Therapeutic Selection -->
+      <div class="section" id="step2">
+        <div class="section-bar bar-green">
+          <div>Therapeutic Selection</div>
+          <div class="status-pill" id="therapyStatus">Awaiting Input</div>
+        </div>
+        <div class="section-body">
+          <div id="medicationsContainer"></div>
+
+          <div class="btn-row">
+            <button class="btn-secondary" id="resetBtn" type="button">Reset</button>
+            <button class="btn-secondary" id="addDrugBtn" type="button">Add Drug</button>
+            <button class="btn-primary" id="reviewBtn" type="button">Run Medication Review</button>
+          </div>
+
+          <div class="review-box" id="reviewResult">
+            Medication review results will appear here.
+          </div>
+        </div>
+      </div>
+
+      <!-- Drug Knowledge Assistant -->
+      <div class="section" id="step3">
+        <div class="section-bar bar-navy">
+          <div>Drug Knowledge Assistant</div>
+          <div class="status-pill">Monograph Q&amp;A</div>
+        </div>
+        <div class="section-body">
+          <div class="grid-4">
+            <div class="field">
+              <label>Drug</label>
+              <select id="questionDrug">
+                <option value="">Select a drug</option>
+              </select>
+            </div>
+
+            <div class="field" style="grid-column: span 3;">
+              <label>Question</label>
+              <input id="questionText" type="text" placeholder="Ask anything about the selected drug">
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-primary" id="askDrugBtn" type="button">Ask</button>
+          </div>
+
+          <div class="qa-box" id="questionResult">
+            Drug answer and evidence quotes will appear here.
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Clinical decision support tool. Always verify with institutional protocols.
+        <div class="credit2">Designed &amp; Innovated by Mohammed Al-Ishaq</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "/api/ask";
+    let DRUGS = [];
+    let medCounter = 0;
+
+    const els = {
+      age: document.getElementById("age"),
+      sex: document.getElementById("sex"),
+      weight: document.getElementById("weight"),
+      height: document.getElementById("height"),
+      scr: document.getElementById("scr"),
+      aki: document.getElementById("aki"),
+      krt: document.getElementById("krt"),
+      routePref: document.getElementById("routePref"),
+      severity: document.getElementById("severity"),
+      infusion: document.getElementById("infusion"),
+      calcBox: document.getElementById("calcBox"),
+      patientStatus: document.getElementById("patientStatus"),
+      therapyStatus: document.getElementById("therapyStatus"),
+      medicationsContainer: document.getElementById("medicationsContainer"),
+      addDrugBtn: document.getElementById("addDrugBtn"),
+      resetBtn: document.getElementById("resetBtn"),
+      reviewBtn: document.getElementById("reviewBtn"),
+      reviewResult: document.getElementById("reviewResult"),
+      questionDrug: document.getElementById("questionDrug"),
+      questionText: document.getElementById("questionText"),
+      askDrugBtn: document.getElementById("askDrugBtn"),
+      questionResult: document.getElementById("questionResult")
+    };
+
+    function round1(x){ return Math.round(x * 10) / 10; }
+
+    function calcBMI(weight, heightCm){
+      if(!weight || !heightCm) return null;
+      const h = heightCm / 100;
+      return weight / (h * h);
+    }
+
+    function calcIBW(heightCm, sex){
+      if(!heightCm || !sex) return null;
+      const htIn = heightCm / 2.54;
+      const base = sex === "M" ? 50 : 45.5;
+      return base + 2.3 * (htIn - 60);
+    }
+
+    function calcAdjBW(weight, ibw){
+      if(!weight || !ibw) return null;
+      return weight <= ibw ? weight : ibw + 0.4 * (weight - ibw);
+    }
+
+    function calcCrCl(age, sex, weightKg, scrUmol){
+      if(!age || !sex || !weightKg || !scrUmol) return null;
+      const scrMgDl = scrUmol / 88.4;
+      let crcl = ((140 - age) * weightKg) / (72 * scrMgDl);
+      if(sex === "F") crcl *= 0.85;
+      return crcl;
+    }
+
+    function getPatient(){
+      return {
+        age: Number(els.age.value || 0),
+        sex: els.sex.value || "",
+        weight: Number(els.weight.value || 0),
+        height: Number(els.height.value || 0),
+        creatinine: Number(els.scr.value || 0),
+        aki: els.aki.value || "no",
+        krt: els.krt.value || "none",
+        route_preference: els.routePref.value || "ivpo",
+        severity: els.severity.value || "standard",
+        infusion: els.infusion.value || "traditional"
+      };
+    }
+
+    function patientReady(){
+      const p = getPatient();
+      return !!(p.age && p.sex && p.weight && p.height && p.creatinine);
+    }
+
+    function updatePatientMetrics(){
+      const p = getPatient();
+
+      if(!patientReady()){
+        els.patientStatus.textContent = "Awaiting Input";
+        els.calcBox.textContent = "Patient metrics will be displayed here.";
+        return;
+      }
+
+      const bmi = calcBMI(p.weight, p.height);
+      const ibw = calcIBW(p.height, p.sex);
+      const adjbw = calcAdjBW(p.weight, ibw);
+      const crclTBW = calcCrCl(p.age, p.sex, p.weight, p.creatinine);
+      const crclAdj = adjbw ? calcCrCl(p.age, p.sex, adjbw, p.creatinine) : null;
+
+      els.patientStatus.textContent = "Ready";
+
+      els.calcBox.innerHTML = `
+        <b>Actual BW:</b> ${round1(p.weight)} kg &nbsp; | &nbsp;
+        <b>IBW:</b> ${ibw ? round1(ibw) : "—"} kg &nbsp; | &nbsp;
+        <b>AdjBW:</b> ${adjbw ? round1(adjbw) : "—"} kg &nbsp; | &nbsp;
+        <b>BMI:</b> ${bmi ? round1(bmi) : "—"} &nbsp; | &nbsp;
+        <b>CrCl (TBW):</b> ${crclTBW ? round1(crclTBW) : "—"} mL/min &nbsp; | &nbsp;
+        <b>CrCl (AdjBW):</b> ${crclAdj ? round1(crclAdj) : "—"} mL/min
+      `;
+    }
+
+    async function postAPI(payload){
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      return res.json();
+    }
+
+    async function loadDrugs(){
+      try{
+        const data = await postAPI({ action: "get_drugs" });
+        DRUGS = Array.isArray(data.drugs) ? data.drugs : [];
+        populateQuestionDrug();
+        if(els.medicationsContainer.children.length === 0){
+          addMedicationRow();
+        } else {
+          refreshAllDrugSelects();
+        }
+      }catch(e){
+        els.reviewResult.innerHTML = `<div class="loading">Failed to load drugs.</div>`;
+      }
+    }
+
+    function populateQuestionDrug(){
+      els.questionDrug.innerHTML = `<option value="">Select a drug</option>`;
+      DRUGS.forEach(drug => {
+        const opt = document.createElement("option");
+        opt.value = drug;
+        opt.textContent = drug;
+        els.questionDrug.appendChild(opt);
+      });
+    }
+
+    function createDrugOptions(select, placeholder = "Select a Drug"){
+      select.innerHTML = "";
+      const first = document.createElement("option");
+      first.value = "";
+      first.textContent = placeholder;
+      select.appendChild(first);
+
+      DRUGS.forEach(drug => {
+        const opt = document.createElement("option");
+        opt.value = drug;
+        opt.textContent = drug;
+        select.appendChild(opt);
+      });
+    }
+
+    function refreshAllDrugSelects(){
+      document.querySelectorAll(".drug-select").forEach(select => {
+        const current = select.value;
+        createDrugOptions(select);
+        if(DRUGS.includes(current)) select.value = current;
+      });
+    }
+
+    function addMedicationRow(){
+      medCounter += 1;
+
+      const row = document.createElement("div");
+      row.className = "medication-row";
+      row.dataset.index = medCounter;
+
+      row.innerHTML = `
+        <div class="med-head">
+          <div>Medication ${medCounter}</div>
+          <div></div>
+        </div>
+
+        <div class="med-grid">
+          <div class="field">
+            <label>Drug</label>
+            <select class="drug-select"></select>
+          </div>
+
+          <div class="field">
+            <label>Indication</label>
+            <select class="indication-select">
+              <option value="">Select an Indication</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Current Dose</label>
+            <input class="dose-input" type="text" placeholder="e.g. 1 g">
+          </div>
+
+          <div class="field">
+            <label>Frequency</label>
+            <input class="freq-input" type="text" placeholder="e.g. q12h">
+          </div>
+
+          <div class="field">
+            <label>Route</label>
+            <input class="route-input" type="text" placeholder="e.g. IV">
+          </div>
+
+          <div class="field">
+            <button type="button" class="btn-danger remove-med-btn">Remove</button>
+          </div>
+        </div>
+      `;
+
+      els.medicationsContainer.appendChild(row);
+
+      const drugSelect = row.querySelector(".drug-select");
+      const indicationSelect = row.querySelector(".indication-select");
+      const removeBtn = row.querySelector(".remove-med-btn");
+
+      createDrugOptions(drugSelect);
+
+      drugSelect.addEventListener("change", async () => {
+        await loadIndicationsForRow(row);
+      });
+
+      removeBtn.addEventListener("click", () => {
+        row.remove();
+        updateTherapyStatus();
+      });
+
+      updateTherapyStatus();
+    }
+
+    function updateTherapyStatus(){
+      const count = document.querySelectorAll(".medication-row").length;
+      els.therapyStatus.textContent = count ? `${count} Medication${count > 1 ? "s" : ""}` : "Awaiting Input";
+    }
+
+    async function loadIndicationsForRow(row){
+      const drug = row.querySelector(".drug-select").value;
+      const indicationSelect = row.querySelector(".indication-select");
+
+      indicationSelect.innerHTML = `<option value="">Loading indications...</option>`;
+
+      if(!drug){
+        indicationSelect.innerHTML = `<option value="">Select an Indication</option>`;
+        return;
+      }
+
+      try{
+        const data = await postAPI({
+          action: "get_indications",
+          drug,
+          patient: getPatient()
+        });
+
+        indicationSelect.innerHTML = `<option value="">Select an Indication</option>`;
+
+        const indications = Array.isArray(data.indications) ? data.indications : [];
+        if(!indications.length){
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "No indications found";
+          indicationSelect.appendChild(opt);
+          return;
+        }
+
+        indications.forEach(ind => {
+          const opt = document.createElement("option");
+          opt.value = ind;
+          opt.textContent = ind;
+          indicationSelect.appendChild(opt);
+        });
+      }catch(e){
+        indicationSelect.innerHTML = `<option value="">Failed to load indications</option>`;
+      }
+    }
+
+    function collectMedications(){
+      const meds = [];
+
+      document.querySelectorAll(".medication-row").forEach(row => {
+        meds.push({
+          drug: row.querySelector(".drug-select").value || "",
+          indication: row.querySelector(".indication-select").value || "",
+          current_dose: row.querySelector(".dose-input").value || "",
+          frequency: row.querySelector(".freq-input").value || "",
+          route: row.querySelector(".route-input").value || ""
+        });
+      });
+
+      return meds.filter(m => m.drug);
+    }
+
+    async function runMedicationReview(){
+      if(!patientReady()){
+        els.reviewResult.innerHTML = `<div class="loading">Please complete patient profile first.</div>`;
+        return;
+      }
+
+      const medications = collectMedications();
+      if(!medications.length){
+        els.reviewResult.innerHTML = `<div class="loading">Please add at least one medication.</div>`;
+        return;
+      }
+
+      els.reviewResult.innerHTML = `<div class="loading">Running medication review...</div>`;
+
+      try{
+        const data = await postAPI({
+          action: "calculate_review",
+          patient: getPatient(),
+          medications
+        });
+
+        renderReview(data);
+      }catch(e){
+        els.reviewResult.innerHTML = `<div class="loading">Failed to run review.</div>`;
+      }
+    }
+
+    function renderReview(data){
+      if(!data || !data.ok){
+        els.reviewResult.innerHTML = `<div class="loading">No structured review returned.</div>`;
+        return;
+      }
+
+      let html = "";
+
+      if(data.patient_summary){
+        const p = data.patient_summary;
+        html += `
+          <div class="review-card">
+            <h4>Patient Summary</h4>
+            <div class="review-line"><b>BMI:</b> ${p.bmi ?? "—"}</div>
+            <div class="review-line"><b>IBW:</b> ${p.ibw ?? "—"} kg</div>
+            <div class="review-line"><b>AdjBW:</b> ${p.adjbw ?? "—"} kg</div>
+            <div class="review-line"><b>CrCl (TBW):</b> ${p.crcl_tbw ?? "—"} mL/min</div>
+            <div class="review-line"><b>CrCl (AdjBW):</b> ${p.crcl_adjbw ?? "—"} mL/min</div>
+          </div>
+        `;
+      }
+
+      const review = Array.isArray(data.medication_review) ? data.medication_review : [];
+      review.forEach(item => {
+        html += `
+          <div class="review-card">
+            <h4>${escapeHtml(item.drug || "Medication")}</h4>
+            <div class="review-line"><b>Assessment:</b> ${escapeHtml(item.assessment || "—")}</div>
+            <div class="review-line"><b>Recommended Regimen:</b> ${escapeHtml(item.recommended_regimen || "—")}</div>
+            <div class="review-line"><b>Monitoring:</b> ${Array.isArray(item.monitoring) && item.monitoring.length ? escapeHtml(item.monitoring.join(", ")) : "—"}</div>
+            <div class="review-line"><b>Warnings:</b> ${Array.isArray(item.warnings) && item.warnings.length ? escapeHtml(item.warnings.join(", ")) : "—"}</div>
+            <div class="review-line"><b>Evidence:</b> ${Array.isArray(item.evidence) && item.evidence.length ? escapeHtml(item.evidence.join(" | ")) : "—"}</div>
+          </div>
+        `;
+      });
+
+      if(Array.isArray(data.global_warnings) && data.global_warnings.length){
+        html += `<div class="warn-list"><b>Global Warnings</b><br>`;
+        data.global_warnings.forEach(w => {
+          html += `• ${escapeHtml(w)}<br>`;
+        });
+        html += `</div>`;
+      }
+
+      els.reviewResult.innerHTML = html || `<div class="loading">No review output.</div>`;
+    }
+
+    async function askDrugQuestion(){
+      const drug = els.questionDrug.value;
+      const question = els.questionText.value.trim();
+
+      if(!drug){
+        els.questionResult.innerHTML = `<div class="loading">Please select a drug.</div>`;
+        return;
+      }
+
+      if(!question){
+        els.questionResult.innerHTML = `<div class="loading">Please enter a question.</div>`;
+        return;
+      }
+
+      els.questionResult.innerHTML = `<div class="loading">Searching selected drug monograph...</div>`;
+
+      try{
+        const data = await postAPI({
+          action: "drug_question",
+          drug,
+          question
+        });
+
+        renderDrugAnswer(data);
+      }catch(e){
+        els.questionResult.innerHTML = `<div class="loading">Failed to get drug answer.</div>`;
+      }
+    }
+
+    function renderDrugAnswer(data){
+      if(!data || !data.ok){
+        els.questionResult.innerHTML = `<div class="loading">No answer returned.</div>`;
+        return;
+      }
+
+      let html = `<div class="qa-answer"><b>Answer:</b> ${escapeHtml(data.answer || "—")}</div>`;
+
+      if(Array.isArray(data.evidence) && data.evidence.length){
+        html += `<div><b>Supporting Evidence</b></div>`;
+        data.evidence.forEach(ev => {
+          html += `
+            <div class="quote">
+              "${escapeHtml(ev.quote || "")}"
+              <div class="quote-source">${escapeHtml(ev.source || "Unknown source")}${ev.page ? ` - Page ${escapeHtml(String(ev.page))}` : ""}</div>
+            </div>
+          `;
+        });
+      }
+
+      els.questionResult.innerHTML = html;
+    }
+
+    function escapeHtml(str){
+      return String(str || "").replace(/[&<>"']/g, m => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+      }[m]));
+    }
+
+    function resetForm(){
+      [
+        els.age, els.weight, els.height, els.scr
+      ].forEach(i => i.value = "");
+      els.sex.value = "";
+      els.aki.value = "no";
+      els.krt.value = "none";
+      els.routePref.value = "ivpo";
+      els.severity.value = "standard";
+      els.infusion.value = "traditional";
+
+      els.calcBox.textContent = "Patient metrics will be displayed here.";
+      els.patientStatus.textContent = "Awaiting Input";
+
+      els.medicationsContainer.innerHTML = "";
+      medCounter = 0;
+      addMedicationRow();
+
+      els.reviewResult.textContent = "Medication review results will appear here.";
+      els.questionText.value = "";
+      els.questionResult.textContent = "Drug answer and evidence quotes will appear here.";
+    }
+
+    // Events
+    [els.age, els.sex, els.weight, els.height, els.scr, els.aki, els.krt, els.routePref, els.severity, els.infusion]
+      .forEach(el => {
+        el.addEventListener("input", updatePatientMetrics);
+        el.addEventListener("change", async () => {
+          updatePatientMetrics();
+          const rows = document.querySelectorAll(".medication-row");
+          for(const row of rows){
+            const drug = row.querySelector(".drug-select").value;
+            if(drug){
+              await loadIndicationsForRow(row);
+            }
+          }
+        });
+      });
+
+    els.addDrugBtn.addEventListener("click", addMedicationRow);
+    els.reviewBtn.addEventListener("click", runMedicationReview);
+    els.askDrugBtn.addEventListener("click", askDrugQuestion);
+    els.resetBtn.addEventListener("click", resetForm);
+
+    // Init
+    updatePatientMetrics();
+    loadDrugs();
+  </script>
 </body>
 </html>
