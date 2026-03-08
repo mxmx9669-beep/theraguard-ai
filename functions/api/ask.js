@@ -26,7 +26,7 @@ export async function onRequest(context) {
       return json({ ok: false, error: "VECTOR_STORE_ID missing" }, 500, corsHeaders);
     }
 
-    const action = (body.action || "").trim();
+    const action = String(body.action || "").trim();
 
     if (action === "get_drugs") {
       const drugs = await getDrugsFromVectorStore(env);
@@ -34,7 +34,7 @@ export async function onRequest(context) {
     }
 
     if (action === "get_indications") {
-      const drug = (body.drug || "").trim();
+      const drug = String(body.drug || "").trim();
       const patient = body.patient || {};
 
       if (!drug) {
@@ -42,6 +42,19 @@ export async function onRequest(context) {
       }
 
       const result = await getIndicationsForDrug(env, drug, patient);
+      return json(result, 200, corsHeaders);
+    }
+
+    if (action === "get_subindications") {
+      const drug = String(body.drug || "").trim();
+      const indication = String(body.indication || "").trim();
+      const patient = body.patient || {};
+
+      if (!drug || !indication) {
+        return json({ ok: false, error: "Drug and indication are required" }, 400, corsHeaders);
+      }
+
+      const result = await getSubIndicationsForDrug(env, drug, indication, patient);
       return json(result, 200, corsHeaders);
     }
 
@@ -83,7 +96,7 @@ function json(data, status = 200, corsHeaders = {}) {
 }
 
 /* =========================
-   OpenAI HTTP helper
+   OpenAI helper
 ========================= */
 async function openaiFetch(env, path, options = {}) {
   const response = await fetch(`https://api.openai.com/v1${path}`, {
@@ -173,7 +186,7 @@ function buildPatientMetrics(patient = {}) {
 }
 
 /* =========================
-   Vector store file catalog
+   Vector store files
 ========================= */
 async function listVectorStoreFiles(env) {
   const vsFiles = await openaiFetch(
@@ -200,7 +213,7 @@ async function listVectorStoreFiles(env) {
         drug_name: drugName,
       });
     } catch (_) {
-      // ignore one-file failures
+      // ignore single-file failures
     }
   }
 
@@ -209,6 +222,7 @@ async function listVectorStoreFiles(env) {
 
 async function getDrugsFromVectorStore(env) {
   const files = await listVectorStoreFiles(env);
+
   const names = files
     .map(f => f.drug_name)
     .filter(Boolean);
@@ -226,7 +240,7 @@ function cleanDrugName(filename) {
     .replace(/\bdrug information\b/gi, "")
     .replace(/\bmonograph\b/gi, "")
     .replace(/\bguideline\b/gi, "")
-    .replace(/\bprotocol\b/gi, "Protocol")
+    .replace(/\bprotocol\b/gi, "")
     .trim();
 }
 
@@ -244,12 +258,14 @@ async function findDrugFiles(env, drug) {
   const exact = files.filter(f => normalize(f.drug_name) === target);
   if (exact.length) return exact;
 
-  const loose = files.filter(f => normalize(f.drug_name).includes(target) || target.includes(normalize(f.drug_name)));
+  const loose = files.filter(
+    f => normalize(f.drug_name).includes(target) || target.includes(normalize(f.drug_name))
+  );
   return loose;
 }
 
 /* =========================
-   Vector search helpers
+   Search helpers
 ========================= */
 async function searchVectorStore(env, query, maxNumResults = 8) {
   const data = await openaiFetch(
@@ -379,7 +395,7 @@ function parseJsonFromText(text) {
 }
 
 /* =========================
-   Action: get_indications
+   Indications
 ========================= */
 async function getIndicationsForDrug(env, drug, patient) {
   const metrics = buildPatientMetrics(patient);
@@ -389,18 +405,20 @@ async function getIndicationsForDrug(env, drug, patient) {
 
   let results = await searchVectorStore(
     env,
-    `${drug} indications clinical pathways approved uses dosing pathways renal dialysis dosing`
+    `${drug} indications pathways approved uses dosing pathways renal dialysis patient selection`,
+    10
   );
 
   results = filterResultsByFileIds(results, fileIds);
   const evidence = mapResultsToEvidence(results, fileMap).slice(0, 8);
 
   const systemPrompt = `
-You extract indication/pathway options from drug monograph evidence.
+You extract main indication/pathway options from drug monograph evidence.
 Return ONLY valid JSON.
 No markdown.
-Split clinically distinct branches into separate selectable options.
-If patient age, renal function, obesity, or renal replacement therapy clearly changes the branch, prefer patient-relevant branches.
+Return concise selectable indication labels only.
+Do not return dose, frequency, route, or narrative explanations inside indication labels.
+If patient context makes certain pathways more relevant, prefer those.
 `;
 
   const userPrompt = `
@@ -413,14 +431,14 @@ Calculated metrics:
 ${JSON.stringify(metrics, null, 2)}
 
 Evidence:
-${evidence.map((e, i) => `SOURCE ${i + 1} (${e.source}):\n${e.text}`).join("\n\n")}
+${evidence.map((e, i) => `SOURCE ${i + 1} (${e.source}${e.page ? `, Page ${e.page}` : ""}):\n${e.text}`).join("\n\n")}
 
 Return exactly:
 {
   "ok": true,
-  "indications": ["..."],
-  "note": "...",
-  "drug_note": "..."
+  "indications": [
+    { "value": "...", "label": "..." }
+  ]
 }
 `;
 
@@ -434,13 +452,69 @@ Return exactly:
   return {
     ok: true,
     indications: [],
-    note: "No structured indication options extracted",
-    drug_note: `Could not extract pathways for ${drug}`,
+  };
+}
+
+async function getSubIndicationsForDrug(env, drug, indication, patient) {
+  const metrics = buildPatientMetrics(patient);
+  const drugFiles = await findDrugFiles(env, drug);
+  const fileIds = drugFiles.map(f => f.file_id);
+  const fileMap = buildFileMap(drugFiles);
+
+  let results = await searchVectorStore(
+    env,
+    `${drug} ${indication} sub pathway branch subgroup dosing criteria renal dialysis`,
+    10
+  );
+
+  results = filterResultsByFileIds(results, fileIds);
+  const evidence = mapResultsToEvidence(results, fileMap).slice(0, 8);
+
+  const systemPrompt = `
+You extract optional sub-pathway options under a chosen drug indication.
+Return ONLY valid JSON.
+No markdown.
+Return only meaningful sub-branches if clearly present in evidence.
+If none exist, return an empty array.
+`;
+
+  const userPrompt = `
+Drug: ${drug}
+Main indication: ${indication}
+
+Patient:
+${JSON.stringify(patient, null, 2)}
+
+Calculated metrics:
+${JSON.stringify(metrics, null, 2)}
+
+Evidence:
+${evidence.map((e, i) => `SOURCE ${i + 1} (${e.source}${e.page ? `, Page ${e.page}` : ""}):\n${e.text}`).join("\n\n")}
+
+Return exactly:
+{
+  "ok": true,
+  "subindications": [
+    { "value": "...", "label": "..." }
+  ]
+}
+`;
+
+  const text = await runModel(env, systemPrompt, userPrompt);
+  const parsed = parseJsonFromText(text);
+
+  if (parsed?.ok && Array.isArray(parsed.subindications)) {
+    return parsed;
+  }
+
+  return {
+    ok: true,
+    subindications: [],
   };
 }
 
 /* =========================
-   Action: calculate_review
+   Regimen generation
 ========================= */
 async function calculateMedicationReview(env, body) {
   const patient = body.patient || {};
@@ -453,17 +527,13 @@ async function calculateMedicationReview(env, body) {
 
   const review = [];
   const allEvidence = [];
-  const allDrugNames = [];
 
   for (const med of medications) {
     const drug = String(med.drug || "").trim();
     const indication = String(med.indication || "").trim();
-    const currentDose = String(med.current_dose || "").trim();
-    const frequency = String(med.frequency || "").trim();
-    const route = String(med.route || "").trim();
+    const subIndication = String(med.sub_indication || "").trim();
 
-    if (!drug) continue;
-    allDrugNames.push(drug);
+    if (!drug || !indication) continue;
 
     const drugFiles = await findDrugFiles(env, drug);
     const fileIds = drugFiles.map(f => f.file_id);
@@ -474,56 +544,55 @@ async function calculateMedicationReview(env, body) {
       [
         drug,
         indication,
-        currentDose,
-        frequency,
-        route,
+        subIndication,
         "dose",
-        "loading dose",
-        "maintenance dose",
+        "frequency",
         "duration",
-        "therapy strategy",
+        "administration",
+        "route",
+        "infusion",
+        "bolus",
+        "loading dose",
+        "maintenance",
         "titration",
+        "monitoring",
         "renal adjustment",
         "dialysis",
         patient.krt || "",
         patient.aki || "",
-        patient.severity || "",
         patient.route_preference || "",
         patient.infusion || "",
-        "monitoring",
-        "warnings"
+        patient.severity || ""
       ].filter(Boolean).join(" "),
-      10
+      12
     );
 
     results = filterResultsByFileIds(results, fileIds);
-    const evidence = mapResultsToEvidence(results, fileMap).slice(0, 8);
+    const evidence = mapResultsToEvidence(results, fileMap).slice(0, 9);
     allEvidence.push(...evidence);
 
     const systemPrompt = `
-You are a clinical pharmacotherapy review assistant.
-Use ONLY the supplied evidence and patient metrics.
+You are a clinical dosing assistant.
+Use ONLY the supplied evidence and patient context.
 Return ONLY valid JSON.
 No markdown.
-Be concise and practical.
-Do not invent recommendations outside the evidence.
-Separate regimen into structured fields whenever possible.
+Return short structured regimen output.
+Do not include patient summary in the output.
+Do not invent unsupported recommendations.
 `;
 
     const userPrompt = `
 Patient:
 ${JSON.stringify(patient, null, 2)}
 
-Calculated patient metrics:
+Calculated metrics:
 ${JSON.stringify(metrics, null, 2)}
 
-Medication to review:
+Selected medication:
 ${JSON.stringify({
   drug,
   indication,
-  current_dose: currentDose,
-  frequency,
-  route,
+  sub_indication: subIndication
 }, null, 2)}
 
 Evidence:
@@ -532,17 +601,22 @@ ${evidence.map((e, i) => `SOURCE ${i + 1} (${e.source}${e.page ? `, Page ${e.pag
 Return exactly:
 {
   "drug": "${drug}",
-  "assessment": "...",
-  "recommended_regimen": "...",
+  "indication": "${indication}",
+  "sub_indication": "${subIndication}",
   "recommended_dose": "...",
   "recommended_frequency": "...",
   "recommended_duration": "...",
-  "therapy_strategy": "...",
+  "administration": "...",
   "monitoring": ["..."],
-  "warnings": ["..."],
-  "evidence": ["..."],
-  "references": ["SOURCE 1", "SOURCE 2"]
+  "therapy_strategy": "...",
+  "evidence": ["..."]
 }
+
+Rules:
+- Keep fields concise
+- administration should summarize route and method, such as IV infusion over 30 min, IV bolus, PO, extended infusion over 3 h, post-HD dose, etc.
+- therapy_strategy should summarize concepts like loading then maintenance, titration up, titration down, TDM-guided dosing, post-dialysis replacement, etc.
+- If a field is not defined in evidence, return an empty string for that field
 `;
 
     const text = await runModel(env, systemPrompt, userPrompt);
@@ -553,38 +627,119 @@ Return exactly:
         ? parsed
         : {
             drug,
-            assessment: "Unable to generate structured review",
-            recommended_regimen: "Review source manually",
+            indication,
+            sub_indication: subIndication,
             recommended_dose: "",
             recommended_frequency: "",
             recommended_duration: "",
-            therapy_strategy: "",
+            administration: "",
             monitoring: [],
-            warnings: [],
+            therapy_strategy: "",
             evidence: [],
-            references: [],
           }
     );
   }
 
-  const globalWarnings = await buildGlobalWarnings(env, patient, medications, metrics, allEvidence);
   const ddi = await detectDDI(env, patient, medications, metrics, allEvidence);
+  const globalWarnings = await buildGlobalWarnings(env, patient, medications, metrics, allEvidence);
 
   return {
     ok: true,
-    patient_summary: metrics,
     medication_review: review,
-    global_warnings: globalWarnings,
     ddi_summary: ddi,
+    global_warnings: globalWarnings,
   };
 }
 
+/* =========================
+   DDI
+========================= */
+async function detectDDI(env, patient, medications, metrics, evidence) {
+  if (!Array.isArray(medications) || medications.length < 2) {
+    return {
+      has_ddi: false,
+      interactions: []
+    };
+  }
+
+  const medNames = medications
+    .map(m => String(m.drug || "").trim())
+    .filter(Boolean);
+
+  const pairs = [];
+  for (let i = 0; i < medNames.length; i++) {
+    for (let j = i + 1; j < medNames.length; j++) {
+      pairs.push(`${medNames[i]} + ${medNames[j]}`);
+    }
+  }
+
+  const systemPrompt = `
+You are a structured drug interaction assistant.
+Use ONLY the supplied medication list, evidence, and patient context.
+Return ONLY valid JSON.
+No markdown.
+Classify clinically meaningful interactions using rating A, B, C, D, or X.
+If no meaningful interaction is supported, return has_ddi false and an empty interactions array.
+Keep management short.
+`;
+
+  const userPrompt = `
+Patient:
+${JSON.stringify(patient, null, 2)}
+
+Calculated metrics:
+${JSON.stringify(metrics, null, 2)}
+
+Medication list:
+${JSON.stringify(medications, null, 2)}
+
+Pairs:
+${JSON.stringify(pairs, null, 2)}
+
+Evidence:
+${evidence.slice(0, 16).map((e, i) => `SOURCE ${i + 1} (${e.source}${e.page ? `, Page ${e.page}` : ""}):\n${e.text}`).join("\n\n")}
+
+Return exactly:
+{
+  "has_ddi": true,
+  "interactions": [
+    {
+      "pair": "...",
+      "rating": "A",
+      "management": "..."
+    }
+  ]
+}
+
+Rules:
+- Use only one of A, B, C, D, X
+- Focus on clinically relevant interactions
+- If unsupported, do not invent
+`;
+
+  const text = await runModel(env, systemPrompt, userPrompt);
+  const parsed = parseJsonFromText(text);
+
+  if (typeof parsed?.has_ddi === "boolean" && Array.isArray(parsed?.interactions)) {
+    return parsed;
+  }
+
+  return {
+    has_ddi: false,
+    interactions: []
+  };
+}
+
+/* =========================
+   Global notes
+========================= */
 async function buildGlobalWarnings(env, patient, medications, metrics, evidence) {
   const systemPrompt = `
 You are a medication safety assistant.
 Use only supplied evidence and medication list.
 Return ONLY valid JSON.
 No markdown.
+Return only short additional notes that are clinically useful.
 `;
 
   const userPrompt = `
@@ -606,8 +761,10 @@ Return exactly:
 }
 
 Rules:
-- Focus on interaction risks, duplicate therapy, additive toxicity, renal safety, bleeding risk, QT risk, nephrotoxicity, overlapping spectrum
-- If no strong global warning is supported, return an empty array
+- Use for concise extra notes only
+- Avoid duplicating regimen fields
+- Avoid repeating DDI management
+- If none, return empty array
 `;
 
   const text = await runModel(env, systemPrompt, userPrompt);
@@ -616,88 +773,8 @@ Rules:
   return Array.isArray(parsed?.global_warnings) ? parsed.global_warnings : [];
 }
 
-async function detectDDI(env, patient, medications, metrics, evidence) {
-  if (!Array.isArray(medications) || medications.length < 2) {
-    return {
-      has_ddi: false,
-      interactions: []
-    };
-  }
-
-  const medNames = medications
-    .map(m => String(m.drug || "").trim())
-    .filter(Boolean);
-
-  const pairText = [];
-  for (let i = 0; i < medNames.length; i++) {
-    for (let j = i + 1; j < medNames.length; j++) {
-      pairText.push(`${medNames[i]} + ${medNames[j]}`);
-    }
-  }
-
-  const systemPrompt = `
-You are a structured drug-drug interaction assistant.
-Use ONLY the supplied evidence, medication list, and patient context.
-Return ONLY valid JSON.
-No markdown.
-Only report interactions supported by supplied evidence or strongly inferable from supplied evidence.
-`;
-
-  const userPrompt = `
-Patient:
-${JSON.stringify(patient, null, 2)}
-
-Calculated metrics:
-${JSON.stringify(metrics, null, 2)}
-
-Medications:
-${JSON.stringify(medications, null, 2)}
-
-Medication pairs:
-${JSON.stringify(pairText, null, 2)}
-
-Evidence:
-${evidence.slice(0, 16).map((e, i) => `SOURCE ${i + 1} (${e.source}${e.page ? `, Page ${e.page}` : ""}):\n${e.text}`).join("\n\n")}
-
-Return exactly:
-{
-  "has_ddi": true,
-  "interactions": [
-    {
-      "pair": "...",
-      "exists": "Yes",
-      "mechanism": "...",
-      "clinical_risk": "...",
-      "management": "..."
-    }
-  ]
-}
-
-Rules:
-- If no clinically meaningful DDI is supported, return:
-{
-  "has_ddi": false,
-  "interactions": []
-}
-- Keep management short and practical
-- Prefer renal toxicity, bleeding, QT, CNS depression, duplicate anticoagulation, serotonin toxicity, electrolyte-related risk, additive hypotension, overlapping spectrum, and TDM-relevant interactions
-`;
-
-  const text = await runModel(env, systemPrompt, userPrompt);
-  const parsed = parseJsonFromText(text);
-
-  if (typeof parsed?.has_ddi === "boolean" && Array.isArray(parsed?.interactions)) {
-    return parsed;
-  }
-
-  return {
-    has_ddi: false,
-    interactions: []
-  };
-}
-
 /* =========================
-   Action: drug_question
+   Drug Q&A
 ========================= */
 async function answerDrugQuestion(env, body) {
   const drug = String(body.drug || "").trim();
@@ -727,9 +804,6 @@ async function answerDrugQuestion(env, body) {
       patient.route_preference || "",
       "renal adjustment",
       "dialysis",
-      "CRRT",
-      "HD",
-      "PIRRT",
       "monitoring"
     ].filter(Boolean).join(" "),
     12
@@ -745,7 +819,7 @@ Return ONLY valid JSON.
 No markdown.
 The answer must be short.
 Provide 2 to 3 evidence quotes directly supporting the answer.
-Use patient context only to prioritize relevant evidence, not to invent unsupported advice.
+Use patient context only to prioritize relevant evidence.
 `;
 
   const userPrompt = `
