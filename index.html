@@ -3,163 +3,99 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>THERAGUARD AI</title>
+
+<title>MediVance AI</title>
 
 <style>
 
 body{
 font-family:Inter,Arial;
-background:#f8fafc;
+background:#f6f8fb;
 margin:0;
 padding:30px;
+color:#0f172a
 }
 
 .container{
-max-width:1000px;
-margin:auto;
+max-width:1100px;
+margin:auto
 }
 
-.topbar{
-background:#0f172a;
-color:white;
-padding:24px 30px;
-border-radius:14px;
+.header{
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:25px;
+margin-bottom:25px
 }
 
-.brand-main{
-font-size:24px;
-font-weight:800;
+.brand{
+font-size:26px;
+font-weight:800
 }
 
-.brand-sub{
-font-size:12px;
-color:#38bdf8;
-letter-spacing:1px;
-margin-top:4px;
-}
-
-.header-right{
+.credit{
 font-size:13px;
-font-weight:700;
-background:rgba(255,255,255,0.1);
-padding:8px 14px;
-border-radius:999px;
+font-weight:600
 }
 
 .card{
 background:white;
-padding:25px;
-border-radius:12px;
-border:1px solid #e2e8f0;
+border-radius:10px;
+padding:20px;
 margin-bottom:20px;
+border:1px solid #e2e8f0
+}
+
+.title{
+font-weight:700;
+margin-bottom:15px
 }
 
 .grid{
 display:grid;
-grid-template-columns:repeat(12,1fr);
-gap:14px;
-}
-
-.field{
-display:flex;
-flex-direction:column;
-}
-
-label{
-font-size:11px;
-font-weight:700;
-color:#64748b;
-margin-bottom:6px;
+grid-template-columns:repeat(4,1fr);
+gap:12px
 }
 
 input,select{
-height:42px;
-border:1px solid #e2e8f0;
-border-radius:8px;
-padding:0 12px;
-font-size:14px;
-}
-
-input:focus,select:focus{
-outline:none;
-border-color:#0ea5e9;
-box-shadow:0 0 0 3px rgba(14,165,233,0.15);
-}
-
-.stepTitle{
-display:flex;
-justify-content:space-between;
-margin-bottom:18px;
-}
-
-.badge{
-font-size:11px;
-padding:4px 10px;
-border-radius:999px;
-background:#f1f5f9;
-border:1px solid #e2e8f0;
-}
-
-.calc-btn-container{
-margin-top:25px;
-display:flex;
-justify-content:flex-end;
-gap:10px;
+padding:10px;
+border-radius:6px;
+border:1px solid #cbd5e1
 }
 
 button{
-padding:12px 22px;
+padding:10px 16px;
 border:none;
+border-radius:6px;
+background:#0f172a;
+color:white;
+font-weight:600;
+cursor:pointer
+}
+
+button.secondary{
+background:#64748b
+}
+
+.medication{
+border:1px dashed #cbd5e1;
+padding:12px;
 border-radius:8px;
-cursor:pointer;
-font-weight:700;
+margin-bottom:10px
 }
 
-#calculateBtn{
-background:#0f172a;
-color:white;
+.answer{
+background:#f1f5f9;
+padding:15px;
+border-radius:8px;
+margin-top:15px
 }
 
-#resetBtn{
+.quote{
 background:white;
-border:1px solid #e2e8f0;
-}
-
-.box{
-background:#0f172a;
-color:white;
-padding:16px;
-border-radius:10px;
-margin-top:15px;
-}
-
-.footerDisclaimer{
-margin-top:40px;
-text-align:center;
-font-size:12px;
-color:#64748b;
-}
-
-.footerCredit{
-margin-top:10px;
-font-weight:700;
-}
-
-@media(max-width:700px){
-
-.grid{
-grid-template-columns:repeat(1,1fr);
-}
-
-.topbar{
-flex-direction:column;
-gap:10px;
-}
-
+border-left:4px solid #0ea5e9;
+padding:10px;
+margin-top:10px
 }
 
 </style>
@@ -169,162 +105,314 @@ gap:10px;
 
 <div class="container">
 
-<div class="topbar">
-
-<div>
-<div class="brand-main">THERAGUARD AI</div>
-<div class="brand-sub">Patient-Specific Clinical Safety Engine</div>
+<div class="header">
+<div class="brand">MediVance AI</div>
+<div class="credit">Designed & Innovated by Mohammed Al-Ishaq</div>
 </div>
 
-<div class="header-right">
-Designed & Innovated by Mohammed Al-Ishaq
-</div>
 
-</div>
-
+<!-- PATIENT PROFILE -->
 
 <div class="card">
 
-<div class="stepTitle">
-<h3>Patient Profile</h3>
-<span class="badge">Input</span>
-</div>
+<div class="title">Patient Profile</div>
 
 <div class="grid">
 
-<div class="field" style="grid-column:span 2;">
-<label>Age</label>
-<input id="age" type="number">
-</div>
+<input id="age" placeholder="Age">
 
-<div class="field" style="grid-column:span 2;">
-<label>Sex</label>
 <select id="sex">
-<option value=""></option>
+<option value="">Sex</option>
 <option value="M">Male</option>
 <option value="F">Female</option>
 </select>
-</div>
 
-<div class="field" style="grid-column:span 2;">
-<label>Weight (kg)</label>
-<input id="wt" type="number">
-</div>
+<input id="weight" placeholder="Weight kg">
 
-<div class="field" style="grid-column:span 2;">
-<label>Height (cm)</label>
-<input id="ht" type="number">
-</div>
+<input id="height" placeholder="Height cm">
 
-<div class="field" style="grid-column:span 2;">
-<label>Creatinine (µmol/L)</label>
-<input id="scr" type="number">
-</div>
+<input id="scr" placeholder="Creatinine µmol">
 
-<div class="field" style="grid-column:span 2;">
-<label>AKI</label>
-<select id="aki">
-<option value="no">No</option>
-<option value="yes">Yes</option>
-</select>
-</div>
-
-<div class="field" style="grid-column:span 3;">
-<label>Renal Replacement</label>
 <select id="krt">
-<option value="none">None</option>
-<option value="ihd">IHD</option>
+<option value="none">No Dialysis</option>
+<option value="ihd">HD</option>
 <option value="crrt">CRRT</option>
 <option value="pirrt">PIRRT</option>
-<option value="pd">PD</option>
 </select>
-</div>
 
-<div class="field" style="grid-column:span 3;">
-<label>Route</label>
-<select id="route">
-<option value="ivpo">IV/PO</option>
-<option value="iv">IV</option>
-<option value="po">PO</option>
-</select>
-</div>
-
-<div class="field" style="grid-column:span 3;">
-<label>Severity</label>
-<select id="severity">
-<option value="standard">Standard</option>
-<option value="severe">Severe</option>
-</select>
-</div>
-
-<div class="field" style="grid-column:span 3;">
-<label>Infusion Strategy</label>
-<select id="infusion">
-<option value="traditional">Traditional</option>
-<option value="extended">Extended</option>
-<option value="continuous">Continuous</option>
-</select>
 </div>
 
 </div>
 
-<div class="box" id="calcBox">
-Patient metrics will appear here
-</div>
 
-</div>
 
+<!-- MEDICATION LIST -->
 
 <div class="card">
 
-<div class="stepTitle">
-<h3>Therapeutic Selection</h3>
-<span class="badge">Select</span>
-</div>
+<div class="title">Medication List</div>
 
-<div class="grid">
+<div id="medications"></div>
 
-<div class="field" style="grid-column:span 6;">
-<label>Drug</label>
-<select id="drugSearch">
-<option>Loading drugs...</option>
-</select>
-</div>
-
-<div class="field" style="grid-column:span 6;">
-<label>Indication</label>
-<select id="indication">
-<option>Select drug first</option>
-</select>
-</div>
-
-</div>
-
-<div class="calc-btn-container">
-
-<button id="resetBtn">Reset</button>
-
-<button id="calculateBtn">
-Calculate Dose
-</button>
-
-</div>
-
-<div class="box" id="doseBox" style="display:none"></div>
+<button onclick="addMedication()">Add Drug</button>
 
 </div>
 
 
-<div class="footerDisclaimer">
-Clinical decision support tool. Always verify with institutional protocol.
 
-<div class="footerCredit">
-Designed & Innovated by Mohammed Al-Ishaq
+<!-- RUN REVIEW -->
+
+<div class="card">
+
+<button onclick="runReview()">Run Medication Review</button>
+
+<div id="reviewResult" class="answer"></div>
+
 </div>
 
-</div>
+
+
+<!-- DRUG KNOWLEDGE -->
+
+<div class="card">
+
+<div class="title">Drug Knowledge Assistant</div>
+
+<select id="questionDrug"></select>
+
+<input id="questionText" placeholder="Ask anything about the drug">
+
+<button onclick="askDrug()">Ask</button>
+
+<div id="questionResult" class="answer"></div>
 
 </div>
+
+
+</div>
+
+
+
+<script>
+
+let drugList=[]
+let medCount=0
+
+
+async function loadDrugs(){
+
+const res=await fetch('/api/ask',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({action:'get_drugs'})
+})
+
+const data=await res.json()
+
+drugList=data.drugs||[]
+
+populateDrugSelectors()
+
+}
+
+
+function populateDrugSelectors(){
+
+const q=document.getElementById("questionDrug")
+
+q.innerHTML=''
+
+drugList.forEach(d=>{
+
+let opt=document.createElement("option")
+
+opt.value=d
+opt.textContent=d
+
+q.appendChild(opt)
+
+})
+
+}
+
+
+function addMedication(){
+
+medCount++
+
+const div=document.createElement("div")
+
+div.className="medication"
+
+div.innerHTML=`
+
+<select class="drug"></select>
+
+<input class="indication" placeholder="Indication">
+
+<input class="dose" placeholder="Current Dose">
+
+<input class="freq" placeholder="Frequency">
+
+<input class="route" placeholder="Route">
+
+`
+
+document.getElementById("medications").appendChild(div)
+
+const select=div.querySelector(".drug")
+
+drugList.forEach(d=>{
+
+let opt=document.createElement("option")
+
+opt.value=d
+opt.textContent=d
+
+select.appendChild(opt)
+
+})
+
+}
+
+
+
+async function runReview(){
+
+const patient={
+
+age:Number(age.value),
+sex:sex.value,
+weight:Number(weight.value),
+height:Number(height.value),
+creatinine:Number(scr.value),
+krt:krt.value
+
+}
+
+
+let medications=[]
+
+document.querySelectorAll(".medication").forEach(m=>{
+
+medications.push({
+
+drug:m.querySelector(".drug").value,
+indication:m.querySelector(".indication").value,
+current_dose:m.querySelector(".dose").value,
+frequency:m.querySelector(".freq").value,
+route:m.querySelector(".route").value
+
+})
+
+})
+
+
+const res=await fetch('/api/ask',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+action:'calculate_review',
+patient,
+medications
+})
+})
+
+const data=await res.json()
+
+renderReview(data)
+
+}
+
+
+
+function renderReview(data){
+
+let html=''
+
+data.medication_review.forEach(r=>{
+
+html+=`<h3>${r.drug}</h3>`
+
+html+=`<p><b>Assessment:</b> ${r.assessment}</p>`
+
+html+=`<p><b>Recommended:</b> ${r.recommended_regimen}</p>`
+
+if(r.monitoring?.length){
+
+html+=`<p><b>Monitoring:</b> ${r.monitoring.join(", ")}</p>`
+
+}
+
+if(r.warnings?.length){
+
+html+=`<p><b>Warnings:</b> ${r.warnings.join(", ")}</p>`
+
+}
+
+})
+
+if(data.global_warnings?.length){
+
+html+=`<h3>Global Warnings</h3>`
+
+data.global_warnings.forEach(w=>{
+
+html+=`<p>⚠ ${w}</p>`
+
+})
+
+}
+
+reviewResult.innerHTML=html
+
+}
+
+
+
+async function askDrug(){
+
+const drug=questionDrug.value
+
+const question=questionText.value
+
+const res=await fetch('/api/ask',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+action:'drug_question',
+drug,
+question
+})
+})
+
+const data=await res.json()
+
+let html=`<h3>Answer</h3><p>${data.answer}</p>`
+
+if(data.evidence){
+
+html+=`<h3>Evidence</h3>`
+
+data.evidence.forEach(e=>{
+
+html+=`<div class="quote">"${e.quote}"<br><small>${e.source}</small></div>`
+
+})
+
+}
+
+questionResult.innerHTML=html
+
+}
+
+
+
+loadDrugs()
+
+addMedication()
+
+</script>
 
 </body>
 </html>
