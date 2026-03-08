@@ -28,6 +28,7 @@
     }
 
     *{box-sizing:border-box}
+
     body{
       margin:0;
       background:var(--bg);
@@ -208,6 +209,7 @@
       border-radius:3px;
       padding:10px 12px;
       font-size:13px;
+      line-height:1.8;
     }
 
     .metrics-box b{
@@ -302,6 +304,7 @@
     .review-line{
       font-size:13px;
       margin:4px 0;
+      line-height:1.6;
     }
 
     .review-line b{
@@ -314,6 +317,8 @@
       background:#fff7e8;
       border:1px solid #f0d49e;
       border-radius:6px;
+      font-size:13px;
+      line-height:1.7;
     }
 
     .qa-answer{
@@ -360,6 +365,17 @@
       font-style:italic;
     }
 
+    .empty-note{
+      color:#6b7a90;
+      font-size:13px;
+    }
+
+    .ddi-divider{
+      border:none;
+      border-top:1px solid #e5eaf0;
+      margin:10px 0;
+    }
+
     @media (max-width: 980px){
       .grid-6{grid-template-columns:repeat(2,1fr)}
       .grid-4{grid-template-columns:repeat(2,1fr)}
@@ -389,7 +405,6 @@
     </div>
 
     <div class="content">
-      <!-- Patient Profile -->
       <div class="section" id="step1">
         <div class="section-bar bar-blue">
           <div>Patient Profile</div>
@@ -490,7 +505,6 @@
         </div>
       </div>
 
-      <!-- Therapeutic Selection -->
       <div class="section" id="step2">
         <div class="section-bar bar-green">
           <div>Therapeutic Selection</div>
@@ -511,7 +525,6 @@
         </div>
       </div>
 
-      <!-- Drug Knowledge Assistant -->
       <div class="section" id="step3">
         <div class="section-bar bar-navy">
           <div>Drug Knowledge Assistant</div>
@@ -627,14 +640,9 @@
       return !!(p.age && p.sex && p.weight && p.height && p.creatinine);
     }
 
-    function updatePatientMetrics(){
+    function buildFrontPatientMetrics(){
       const p = getPatient();
-
-      if(!patientReady()){
-        els.patientStatus.textContent = "Awaiting Input";
-        els.calcBox.textContent = "Patient metrics will be displayed here.";
-        return;
-      }
+      if(!patientReady()) return null;
 
       const bmi = calcBMI(p.weight, p.height);
       const ibw = calcIBW(p.height, p.sex);
@@ -642,15 +650,48 @@
       const crclTBW = calcCrCl(p.age, p.sex, p.weight, p.creatinine);
       const crclAdj = adjbw ? calcCrCl(p.age, p.sex, adjbw, p.creatinine) : null;
 
+      let dosingWeightType = "TBW";
+      let dosingWeight = p.weight;
+
+      if(bmi && bmi >= 30 && adjbw){
+        dosingWeightType = "AdjBW";
+        dosingWeight = adjbw;
+      }
+
+      const crclDosing = calcCrCl(p.age, p.sex, dosingWeight, p.creatinine);
+
+      return {
+        bmi,
+        ibw,
+        adjbw,
+        crclTBW,
+        crclAdj,
+        dosingWeightType,
+        dosingWeight,
+        crclDosing
+      };
+    }
+
+    function updatePatientMetrics(){
+      const metrics = buildFrontPatientMetrics();
+
+      if(!metrics){
+        els.patientStatus.textContent = "Awaiting Input";
+        els.calcBox.textContent = "Patient metrics will be displayed here.";
+        return;
+      }
+
       els.patientStatus.textContent = "Ready";
 
       els.calcBox.innerHTML = `
-        <b>Actual BW:</b> ${round1(p.weight)} kg &nbsp; | &nbsp;
-        <b>IBW:</b> ${ibw ? round1(ibw) : "—"} kg &nbsp; | &nbsp;
-        <b>AdjBW:</b> ${adjbw ? round1(adjbw) : "—"} kg &nbsp; | &nbsp;
-        <b>BMI:</b> ${bmi ? round1(bmi) : "—"} &nbsp; | &nbsp;
-        <b>CrCl (TBW):</b> ${crclTBW ? round1(crclTBW) : "—"} mL/min &nbsp; | &nbsp;
-        <b>CrCl (AdjBW):</b> ${crclAdj ? round1(crclAdj) : "—"} mL/min
+        <b>Actual BW:</b> ${round1(getPatient().weight)} kg &nbsp; | &nbsp;
+        <b>IBW:</b> ${metrics.ibw ? round1(metrics.ibw) : "—"} kg &nbsp; | &nbsp;
+        <b>AdjBW:</b> ${metrics.adjbw ? round1(metrics.adjbw) : "—"} kg &nbsp; | &nbsp;
+        <b>BMI:</b> ${metrics.bmi ? round1(metrics.bmi) : "—"}<br>
+        <b>CrCl (TBW):</b> ${metrics.crclTBW ? round1(metrics.crclTBW) : "—"} mL/min &nbsp; | &nbsp;
+        <b>CrCl (AdjBW):</b> ${metrics.crclAdj ? round1(metrics.crclAdj) : "—"} mL/min &nbsp; | &nbsp;
+        <b>Dosing Weight:</b> ${metrics.dosingWeight ? round1(metrics.dosingWeight) : "—"} kg (${metrics.dosingWeightType || "—"}) &nbsp; | &nbsp;
+        <b>CrCl (Dosing):</b> ${metrics.crclDosing ? round1(metrics.crclDosing) : "—"} mL/min
       `;
     }
 
@@ -660,7 +701,14 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      return res.json();
+
+      const data = await res.json().catch(() => ({}));
+
+      if(!res.ok){
+        throw new Error(data.error || "API request failed");
+      }
+
+      return data;
     }
 
     async function loadDrugs(){
@@ -668,6 +716,7 @@
         const data = await postAPI({ action: "get_drugs" });
         DRUGS = Array.isArray(data.drugs) ? data.drugs : [];
         populateQuestionDrug();
+
         if(els.medicationsContainer.children.length === 0){
           addMedicationRow();
         } else {
@@ -761,7 +810,6 @@
       els.medicationsContainer.appendChild(row);
 
       const drugSelect = row.querySelector(".drug-select");
-      const indicationSelect = row.querySelector(".indication-select");
       const removeBtn = row.querySelector(".remove-med-btn");
 
       createDrugOptions(drugSelect);
@@ -846,8 +894,15 @@
       }
 
       const medications = collectMedications();
+
       if(!medications.length){
         els.reviewResult.innerHTML = `<div class="loading">Please add at least one medication.</div>`;
+        return;
+      }
+
+      const missingIndication = medications.some(m => !m.indication);
+      if(missingIndication){
+        els.reviewResult.innerHTML = `<div class="loading">Please select indication for each medication.</div>`;
         return;
       }
 
@@ -862,7 +917,7 @@
 
         renderReview(data);
       }catch(e){
-        els.reviewResult.innerHTML = `<div class="loading">Failed to run review.</div>`;
+        els.reviewResult.innerHTML = `<div class="loading">${escapeHtml(e.message || "Failed to run review.")}</div>`;
       }
     }
 
@@ -884,6 +939,8 @@
             <div class="review-line"><b>AdjBW:</b> ${p.adjbw ?? "—"} kg</div>
             <div class="review-line"><b>CrCl (TBW):</b> ${p.crcl_tbw ?? "—"} mL/min</div>
             <div class="review-line"><b>CrCl (AdjBW):</b> ${p.crcl_adjbw ?? "—"} mL/min</div>
+            <div class="review-line"><b>Dosing Weight:</b> ${p.dosing_weight ?? "—"} kg (${escapeHtml(p.dosing_weight_type || "—")})</div>
+            <div class="review-line"><b>CrCl (Dosing):</b> ${p.crcl_dosing ?? "—"} mL/min</div>
           </div>
         `;
       }
@@ -895,12 +952,38 @@
             <h4>${escapeHtml(item.drug || "Medication")}</h4>
             <div class="review-line"><b>Assessment:</b> ${escapeHtml(item.assessment || "—")}</div>
             <div class="review-line"><b>Recommended Regimen:</b> ${escapeHtml(item.recommended_regimen || "—")}</div>
+            <div class="review-line"><b>Dose:</b> ${escapeHtml(item.recommended_dose || "—")}</div>
+            <div class="review-line"><b>Frequency:</b> ${escapeHtml(item.recommended_frequency || "—")}</div>
+            <div class="review-line"><b>Duration:</b> ${escapeHtml(item.recommended_duration || "—")}</div>
+            <div class="review-line"><b>Strategy:</b> ${escapeHtml(item.therapy_strategy || "—")}</div>
             <div class="review-line"><b>Monitoring:</b> ${Array.isArray(item.monitoring) && item.monitoring.length ? escapeHtml(item.monitoring.join(", ")) : "—"}</div>
             <div class="review-line"><b>Warnings:</b> ${Array.isArray(item.warnings) && item.warnings.length ? escapeHtml(item.warnings.join(", ")) : "—"}</div>
             <div class="review-line"><b>Evidence:</b> ${Array.isArray(item.evidence) && item.evidence.length ? escapeHtml(item.evidence.join(" | ")) : "—"}</div>
           </div>
         `;
       });
+
+      if(data.ddi_summary && Array.isArray(data.ddi_summary.interactions) && data.ddi_summary.interactions.length){
+        html += `<div class="review-card"><h4>Drug-Drug Interactions</h4>`;
+        data.ddi_summary.interactions.forEach((ddi, idx) => {
+          html += `
+            <div class="review-line"><b>Pair:</b> ${escapeHtml(ddi.pair || "—")}</div>
+            <div class="review-line"><b>DDI Exists:</b> ${escapeHtml(ddi.exists || "—")}</div>
+            <div class="review-line"><b>Mechanism:</b> ${escapeHtml(ddi.mechanism || "—")}</div>
+            <div class="review-line"><b>Clinical Risk:</b> ${escapeHtml(ddi.clinical_risk || "—")}</div>
+            <div class="review-line"><b>Management:</b> ${escapeHtml(ddi.management || "—")}</div>
+            ${idx < data.ddi_summary.interactions.length - 1 ? `<hr class="ddi-divider">` : ``}
+          `;
+        });
+        html += `</div>`;
+      } else if(data.ddi_summary && data.ddi_summary.has_ddi === false){
+        html += `
+          <div class="review-card">
+            <h4>Drug-Drug Interactions</h4>
+            <div class="review-line"><b>Status:</b> No clinically significant DDI detected from supplied evidence.</div>
+          </div>
+        `;
+      }
 
       if(Array.isArray(data.global_warnings) && data.global_warnings.length){
         html += `<div class="warn-list"><b>Global Warnings</b><br>`;
@@ -933,12 +1016,13 @@
         const data = await postAPI({
           action: "drug_question",
           drug,
-          question
+          question,
+          patient: getPatient()
         });
 
         renderDrugAnswer(data);
       }catch(e){
-        els.questionResult.innerHTML = `<div class="loading">Failed to get drug answer.</div>`;
+        els.questionResult.innerHTML = `<div class="loading">${escapeHtml(e.message || "Failed to get drug answer.")}</div>`;
       }
     }
 
@@ -976,9 +1060,7 @@
     }
 
     function resetForm(){
-      [
-        els.age, els.weight, els.height, els.scr
-      ].forEach(i => i.value = "");
+      [els.age, els.weight, els.height, els.scr].forEach(i => i.value = "");
       els.sex.value = "";
       els.aki.value = "no";
       els.krt.value = "none";
@@ -998,7 +1080,6 @@
       els.questionResult.textContent = "Drug answer and evidence quotes will appear here.";
     }
 
-    // Events
     [els.age, els.sex, els.weight, els.height, els.scr, els.aki, els.krt, els.routePref, els.severity, els.infusion]
       .forEach(el => {
         el.addEventListener("input", updatePatientMetrics);
@@ -1019,7 +1100,6 @@
     els.askDrugBtn.addEventListener("click", askDrugQuestion);
     els.resetBtn.addEventListener("click", resetForm);
 
-    // Init
     updatePatientMetrics();
     loadDrugs();
   </script>
