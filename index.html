@@ -17,8 +17,6 @@
       --blue-dark:#2067a8;
 
       --soft:#f8fbfe;
-      --soft2:#eef5fb;
-
       --shadow:0 4px 16px rgba(16,42,67,.06);
     }
 
@@ -449,7 +447,7 @@
       const data = await res.json().catch(() => ({}));
 
       if(!res.ok){
-        throw new Error(data.error || data.details || "API request failed");
+        throw new Error(data.details || data.error || "API request failed");
       }
 
       return data;
@@ -481,7 +479,7 @@
         SOURCES = Array.isArray(data.sources) ? data.sources : [];
         renderSources();
       }catch(e){
-        els.chatMessages.innerHTML = `<div class="loading">Failed to load sources.</div>`;
+        els.chatMessages.innerHTML = `<div class="loading">${escapeHtml(e.message || "Failed to load sources.")}</div>`;
       }
     }
 
@@ -554,12 +552,12 @@
       const evidenceMode = els.chatEvidenceMode.value;
 
       if(!source){
-        els.chatMessages.innerHTML = `<div class="loading">Please select a source.</div>`;
+        addAssistantMessage("Please select a source first.", []);
         return;
       }
 
       if(!message){
-        els.chatMessages.innerHTML = `<div class="loading">Please enter a message.</div>`;
+        addAssistantMessage("Please enter a message.", []);
         return;
       }
 
@@ -575,19 +573,21 @@
       renderChat();
 
       try{
+        const historyPayload = CHAT_HISTORY
+          .filter(m => m.role === "user" || m.role === "assistant")
+          .slice(0, -1)
+          .map(m => ({
+            role: m.role,
+            content: m.content
+          }));
+
         const data = await postAPI({
           action: "source_chat",
           source,
           message,
           language,
           evidence_mode: evidenceMode,
-          history: CHAT_HISTORY
-            .filter(m => m.role === "user" || m.role === "assistant")
-            .slice(0, -1)
-            .map(m => ({
-              role: m.role,
-              content: m.content
-            }))
+          history: historyPayload
         });
 
         CHAT_HISTORY.splice(loadingIndex, 1);
