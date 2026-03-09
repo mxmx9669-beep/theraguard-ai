@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MediVance AI</title>
+  <title>MediVance AI - Clinical Knowledge Chat</title>
   <style>
     :root{
       --bg:#f4f7fb;
@@ -12,25 +12,12 @@
       --text:#223246;
       --muted:#6d7f95;
 
-      --blue:#4f93c9;
-      --blue-dark:#2f6f9f;
-
-      --green:#8fb9a0;
-      --green-dark:#5e8e72;
-
       --navy:#123253;
-      --btn:#2f7ec7;
-      --btn-dark:#2067a8;
+      --blue:#2f7ec7;
+      --blue-dark:#2067a8;
 
-      --soft:#f8fbff;
+      --soft:#f8fbfe;
       --soft2:#eef5fb;
-
-      --danger-bg:#faecec;
-      --danger-text:#a63f3f;
-      --danger-line:#efc8c8;
-
-      --warning-bg:#fff7e9;
-      --warning-line:#efd7a5;
 
       --shadow:0 4px 16px rgba(16,42,67,.06);
     }
@@ -42,11 +29,11 @@
       background:var(--bg);
       color:var(--text);
       font-family:Arial, Helvetica, sans-serif;
-      padding:12px;
+      padding:16px;
     }
 
     .app{
-      max-width:1150px;
+      max-width:1100px;
       margin:0 auto;
       background:#fff;
       border:1px solid var(--line);
@@ -93,16 +80,11 @@
       border-radius:2px;
     }
 
-    .logo-box::after{
-      content:"";
-      position:absolute;
-      right:6px;
-      bottom:6px;
-      width:9px;
-      height:9px;
-      border-radius:50%;
-      background:#dff7ea;
-      box-shadow:0 0 0 3px rgba(255,255,255,.55);
+    .brand-sub{
+      font-size:11px;
+      color:var(--muted);
+      margin-top:4px;
+      letter-spacing:.2px;
     }
 
     .brand-title{
@@ -110,13 +92,6 @@
       font-weight:800;
       color:#1d5d8e;
       line-height:1.05;
-      letter-spacing:.2px;
-    }
-
-    .brand-sub{
-      font-size:11px;
-      color:var(--muted);
-      margin-top:4px;
       letter-spacing:.2px;
     }
 
@@ -137,12 +112,11 @@
       background:var(--card);
       border:1px solid var(--line);
       border-radius:10px;
-      margin-bottom:14px;
       overflow:hidden;
     }
 
     .section-bar{
-      min-height:42px;
+      min-height:46px;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -150,11 +124,8 @@
       font-weight:800;
       color:#fff;
       font-size:14px;
+      background:linear-gradient(90deg,var(--navy),#2a4c74);
     }
-
-    .bar-blue{background:linear-gradient(90deg,var(--blue),#6eaad7)}
-    .bar-green{background:linear-gradient(90deg,var(--green),#a4c9b2)}
-    .bar-navy{background:linear-gradient(90deg,var(--navy),#2a4c74)}
 
     .status-pill{
       font-size:11px;
@@ -170,12 +141,6 @@
       padding:14px;
     }
 
-    .grid-6{
-      display:grid;
-      grid-template-columns:repeat(6,1fr);
-      gap:12px;
-    }
-
     .grid-4{
       display:grid;
       grid-template-columns:repeat(4,1fr);
@@ -185,19 +150,13 @@
     .field{
       display:flex;
       flex-direction:column;
-      gap:5px;
+      gap:6px;
     }
 
     label{
       font-size:12px;
       font-weight:800;
       color:#5a6f86;
-    }
-
-    .input-wrap{
-      display:flex;
-      align-items:center;
-      gap:6px;
     }
 
     input, select, textarea{
@@ -213,68 +172,19 @@
     }
 
     input:focus, select:focus, textarea:focus{
-      border-color:var(--btn);
+      border-color:var(--blue);
       box-shadow:0 0 0 3px rgba(47,126,199,.12);
     }
 
-    .unit{
-      width:74px;
-      flex:0 0 74px;
-      text-align:center;
-      background:#f5f8fb;
-      color:#6a7b90;
-      border:1px solid #ccd7e4;
-      border-radius:8px;
-      padding:10px 6px;
-      font-size:12px;
-      font-weight:800;
-    }
-
-    .metrics-box{
-      margin-top:12px;
-      background:linear-gradient(180deg,#edf5fc,#f5f9fd);
-      border:1px solid #d8e7f4;
-      color:#46647f;
-      border-radius:8px;
-      padding:11px 13px;
-      font-size:13px;
-      line-height:1.8;
-    }
-
-    .metrics-box b{
-      color:#29496d;
-    }
-
-    .medication-row{
-      border:1px dashed #d4deea;
-      border-radius:10px;
-      padding:12px;
-      margin-bottom:12px;
-      background:#fcfdff;
-    }
-
-    .med-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:10px;
-      font-size:13px;
-      color:#607388;
-      font-weight:800;
-    }
-
-    .med-grid{
-      display:grid;
-      grid-template-columns:2fr 2fr 2fr auto;
-      gap:10px;
-      align-items:end;
+    textarea{
+      resize:vertical;
     }
 
     .btn-row{
       display:flex;
       justify-content:flex-end;
       gap:8px;
-      margin-top:10px;
+      margin-top:12px;
       flex-wrap:wrap;
     }
 
@@ -289,11 +199,11 @@
     }
 
     .btn-primary{
-      background:var(--btn);
+      background:var(--blue);
       color:#fff;
     }
 
-    .btn-primary:hover{background:var(--btn-dark)}
+    .btn-primary:hover{background:var(--blue-dark)}
 
     .btn-secondary{
       background:#eef2f6;
@@ -301,91 +211,107 @@
       border:1px solid #d6dee8;
     }
 
-    .btn-danger{
-      background:var(--danger-bg);
-      color:var(--danger-text);
-      border:1px solid var(--danger-line);
-      padding:10px 12px;
-    }
-
-    .review-box, .qa-box{
-      margin-top:12px;
-      background:#f8fbfe;
+    .chat-box{
+      margin-top:14px;
+      background:var(--soft);
       border:1px solid #dbe8f4;
-      border-radius:8px;
-      padding:12px;
-      min-height:70px;
-    }
-
-    .review-card{
-      border:1px solid #d9e3ee;
       border-radius:10px;
-      background:#fff;
-      padding:12px;
-      margin-bottom:10px;
+      padding:14px;
+      min-height:360px;
+      max-height:620px;
+      overflow:auto;
     }
 
-    .review-card h4{
-      margin:0 0 10px;
-      color:#1f456a;
-      font-size:15px;
-    }
-
-    .review-line{
-      font-size:13px;
-      margin:4px 0;
-      line-height:1.65;
-    }
-
-    .review-line b{
-      color:#324f6d;
-    }
-
-    .ddi-badge{
-      display:inline-block;
-      min-width:24px;
-      text-align:center;
-      padding:2px 8px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:800;
-      border:1px solid #d7dee8;
-      background:#f4f7fa;
-      color:#334b62;
-    }
-
-    .warn-list{
-      margin-top:10px;
-      padding:10px 12px;
-      background:var(--warning-bg);
-      border:1px solid var(--warning-line);
-      border-radius:10px;
-      font-size:13px;
-      line-height:1.7;
-    }
-
-    .qa-answer{
+    .empty-state{
+      color:#6b7a90;
       font-size:14px;
+    }
+
+    .msg{
+      margin-bottom:14px;
+    }
+
+    .bubble{
+      border-radius:12px;
+      padding:12px 14px;
       line-height:1.7;
-      color:#223;
-      margin-bottom:10px;
+      font-size:14px;
+      white-space:pre-wrap;
+      word-break:break-word;
     }
 
-    .quote{
+    .msg-user .bubble{
+      background:#dfeefe;
+      border:1px solid #c6ddf6;
+      margin-left:auto;
+      max-width:80%;
+    }
+
+    .msg-assistant .bubble{
       background:#fff;
-      border-left:4px solid var(--btn);
-      padding:10px 12px;
-      margin-bottom:8px;
-      border-radius:8px;
-      font-size:13px;
-      line-height:1.65;
+      border:1px solid #d9e3ee;
+      max-width:88%;
     }
 
-    .quote-source{
-      margin-top:6px;
-      color:#64748b;
+    .msg-role{
+      font-size:11px;
+      font-weight:800;
+      color:#6b7a90;
+      margin-bottom:5px;
+    }
+
+    .citations{
+      margin-top:8px;
+      padding-left:10px;
+    }
+
+    .citation-card{
+      margin-top:8px;
+      background:#fff;
+      border-left:4px solid var(--blue);
+      border-radius:8px;
+      padding:10px 12px;
+      border-top:1px solid #d9e3ee;
+      border-right:1px solid #d9e3ee;
+      border-bottom:1px solid #d9e3ee;
+    }
+
+    .citation-meta{
       font-size:12px;
       font-weight:800;
+      color:#56697f;
+      margin-bottom:6px;
+    }
+
+    .citation-quote{
+      font-size:13px;
+      line-height:1.65;
+      color:#223246;
+      white-space:pre-wrap;
+    }
+
+    .chip-row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+
+    .chip{
+      background:#eef2f6;
+      color:#495d74;
+      border:1px solid #d6dee8;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .loading{
+      color:#6b7a90;
+      font-style:italic;
+      font-size:14px;
     }
 
     .footer{
@@ -401,34 +327,17 @@
       color:#5e6c80;
     }
 
-    .loading{
-      color:#6b7a90;
-      font-style:italic;
-    }
-
-    .muted{
-      color:#6b7a90;
-      font-size:13px;
-    }
-
-    .divider{
-      border:none;
-      border-top:1px solid #e6edf4;
-      margin:10px 0;
-    }
-
-    @media (max-width: 980px){
-      .grid-6{grid-template-columns:repeat(2,1fr)}
+    @media (max-width: 900px){
       .grid-4{grid-template-columns:repeat(2,1fr)}
-      .med-grid{grid-template-columns:1fr}
       .credit{display:none}
     }
 
     @media (max-width: 640px){
-      .topbar{flex-direction:column; align-items:flex-start; gap:8px}
-      .grid-6,.grid-4{grid-template-columns:1fr}
-      .btn-row{justify-content:stretch}
+      .topbar{flex-direction:column; align-items:flex-start}
+      .grid-4{grid-template-columns:1fr}
       .btn-row button{width:100%}
+      .msg-user .bubble,
+      .msg-assistant .bubble{max-width:100%}
     }
   </style>
 </head>
@@ -439,168 +348,77 @@
         <div class="logo-box"></div>
         <div>
           <div class="brand-title">MediVance AI</div>
-          <div class="brand-sub">Clinical Dosing & Drug Interaction Platform</div>
+          <div class="brand-sub">Clinical Knowledge Chat</div>
         </div>
       </div>
       <div class="credit">Designed &amp; Innovated by Mohammed Al-Ishaq</div>
     </div>
 
     <div class="content">
-      <!-- Patient -->
-      <div class="section" id="step1">
-        <div class="section-bar bar-blue">
-          <div>Patient Profile</div>
-          <div class="status-pill" id="patientStatus">Awaiting Input</div>
-        </div>
-        <div class="section-body">
-          <div class="grid-6">
-            <div class="field">
-              <label>Age</label>
-              <div class="input-wrap">
-                <input id="age" type="number" min="0">
-                <div class="unit">years</div>
-              </div>
-            </div>
-
-            <div class="field">
-              <label>Sex</label>
-              <select id="sex">
-                <option value="">Select</option>
-                <option value="M">Male</option>
-                <option value="F">Female</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Weight</label>
-              <div class="input-wrap">
-                <input id="weight" type="number" step="0.1" min="0">
-                <div class="unit">kg</div>
-              </div>
-            </div>
-
-            <div class="field">
-              <label>Height</label>
-              <div class="input-wrap">
-                <input id="height" type="number" step="0.1" min="0">
-                <div class="unit">cm</div>
-              </div>
-            </div>
-
-            <div class="field">
-              <label>Serum Creatinine</label>
-              <div class="input-wrap">
-                <input id="scr" type="number" step="0.1" min="0">
-                <div class="unit">µmol/L</div>
-              </div>
-            </div>
-
-            <div class="field">
-              <label>AKI</label>
-              <select id="aki">
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Renal Replacement</label>
-              <select id="krt">
-                <option value="none">None</option>
-                <option value="ihd">Intermittent HD</option>
-                <option value="pd">Peritoneal dialysis</option>
-                <option value="crrt">CRRT</option>
-                <option value="pirrt">PIRRT / SLED</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Preferred Route</label>
-              <select id="routePref">
-                <option value="ivpo">IV/PO</option>
-                <option value="iv">IV</option>
-                <option value="po">PO</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Severity</label>
-              <select id="severity">
-                <option value="standard">Standard</option>
-                <option value="severe">Severe</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Infusion Preference</label>
-              <select id="infusion">
-                <option value="traditional">Traditional</option>
-                <option value="extended">Extended</option>
-                <option value="continuous">Continuous</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="metrics-box" id="calcBox">
-            Patient metrics will be displayed here.
-          </div>
-        </div>
-      </div>
-
-      <!-- Therapeutic Selection -->
-      <div class="section" id="step2">
-        <div class="section-bar bar-green">
-          <div>Therapeutic Selection</div>
-          <div class="status-pill" id="therapyStatus">Awaiting Input</div>
-        </div>
-        <div class="section-body">
-          <div id="medicationsContainer"></div>
-
-          <div class="btn-row">
-            <button class="btn-secondary" id="resetBtn" type="button">Reset</button>
-            <button class="btn-secondary" id="addDrugBtn" type="button">Add Drug</button>
-            <button class="btn-primary" id="reviewBtn" type="button">Generate Regimen</button>
-          </div>
-
-          <div class="review-box" id="reviewResult">
-            Regimen output will appear here.
-          </div>
-        </div>
-      </div>
-
-      <!-- Drug Knowledge Assistant -->
-      <div class="section" id="step3">
-        <div class="section-bar bar-navy">
+      <div class="section">
+        <div class="section-bar">
           <div>Drug Knowledge Assistant</div>
-          <div class="status-pill">Monograph Q&amp;A</div>
+          <div class="status-pill">Source-Locked Chat</div>
         </div>
+
         <div class="section-body">
           <div class="grid-4">
             <div class="field">
-              <label>Drug</label>
-              <select id="questionDrug">
-                <option value="">Select a drug</option>
+              <label>Source</label>
+              <select id="chatSource">
+                <option value="">Select a source</option>
               </select>
             </div>
 
-            <div class="field" style="grid-column: span 3;">
-              <label>Question</label>
-              <input id="questionText" type="text" placeholder="Ask anything about the selected drug">
+            <div class="field">
+              <label>Language Mode</label>
+              <select id="chatLanguage">
+                <option value="auto">Auto</option>
+                <option value="en">English</option>
+                <option value="ar">Arabic</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Evidence Mode</label>
+              <select id="chatEvidenceMode">
+                <option value="standard">Standard</option>
+                <option value="strict">Strict</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Conversation</label>
+              <button class="btn-secondary" id="clearChatBtn" type="button">Clear Chat</button>
             </div>
           </div>
 
-          <div class="btn-row">
-            <button class="btn-primary" id="askDrugBtn" type="button">Ask</button>
+          <div class="chip-row">
+            <button class="chip" type="button" data-chip="What are the main indications?">Indications</button>
+            <button class="chip" type="button" data-chip="What is the recommended dose?">Dose</button>
+            <button class="chip" type="button" data-chip="What about renal adjustment?">Renal</button>
+            <button class="chip" type="button" data-chip="What monitoring is required?">Monitoring</button>
+            <button class="chip" type="button" data-chip="What is the administration method?">Administration</button>
+            <button class="chip" type="button" data-chip="Quote the relevant text.">Quote</button>
           </div>
 
-          <div class="qa-box" id="questionResult">
-            Drug answer and evidence quotes will appear here.
+          <div class="chat-box" id="chatMessages">
+            <div class="empty-state">Choose a source, then start chatting.</div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <label>Message</label>
+            <textarea id="chatInput" rows="4" placeholder="Ask in Arabic or English. Typos are okay."></textarea>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-primary" id="sendChatBtn" type="button">Send</button>
           </div>
         </div>
       </div>
 
       <div class="footer">
-        Clinical decision support tool. Always verify with institutional protocols.
+        Clinical knowledge assistant. Always verify with institutional protocols.
         <div class="credit2">Designed &amp; Innovated by Mohammed Al-Ishaq</div>
       </div>
     </div>
@@ -608,129 +426,18 @@
 
   <script>
     const API_URL = "/api/ask";
-    let DRUGS = [];
-    let medCounter = 0;
+    let SOURCES = [];
+    let CHAT_HISTORY = [];
 
     const els = {
-      age: document.getElementById("age"),
-      sex: document.getElementById("sex"),
-      weight: document.getElementById("weight"),
-      height: document.getElementById("height"),
-      scr: document.getElementById("scr"),
-      aki: document.getElementById("aki"),
-      krt: document.getElementById("krt"),
-      routePref: document.getElementById("routePref"),
-      severity: document.getElementById("severity"),
-      infusion: document.getElementById("infusion"),
-      calcBox: document.getElementById("calcBox"),
-      patientStatus: document.getElementById("patientStatus"),
-      therapyStatus: document.getElementById("therapyStatus"),
-      medicationsContainer: document.getElementById("medicationsContainer"),
-      addDrugBtn: document.getElementById("addDrugBtn"),
-      resetBtn: document.getElementById("resetBtn"),
-      reviewBtn: document.getElementById("reviewBtn"),
-      reviewResult: document.getElementById("reviewResult"),
-      questionDrug: document.getElementById("questionDrug"),
-      questionText: document.getElementById("questionText"),
-      askDrugBtn: document.getElementById("askDrugBtn"),
-      questionResult: document.getElementById("questionResult")
+      chatSource: document.getElementById("chatSource"),
+      chatLanguage: document.getElementById("chatLanguage"),
+      chatEvidenceMode: document.getElementById("chatEvidenceMode"),
+      clearChatBtn: document.getElementById("clearChatBtn"),
+      chatMessages: document.getElementById("chatMessages"),
+      chatInput: document.getElementById("chatInput"),
+      sendChatBtn: document.getElementById("sendChatBtn")
     };
-
-    function round1(x){ return Math.round(x * 10) / 10; }
-
-    function calcBMI(weight, heightCm){
-      if(!weight || !heightCm) return null;
-      const h = heightCm / 100;
-      return weight / (h * h);
-    }
-
-    function calcIBW(heightCm, sex){
-      if(!heightCm || !sex) return null;
-      const htIn = heightCm / 2.54;
-      const base = sex === "M" ? 50 : 45.5;
-      return base + 2.3 * (htIn - 60);
-    }
-
-    function calcAdjBW(weight, ibw){
-      if(!weight || !ibw) return null;
-      return weight <= ibw ? weight : ibw + 0.4 * (weight - ibw);
-    }
-
-    function calcCrCl(age, sex, weightKg, scrUmol){
-      if(!age || !sex || !weightKg || !scrUmol) return null;
-      const scrMgDl = scrUmol / 88.4;
-      let crcl = ((140 - age) * weightKg) / (72 * scrMgDl);
-      if(sex === "F") crcl *= 0.85;
-      return crcl;
-    }
-
-    function getPatient(){
-      return {
-        age: Number(els.age.value || 0),
-        sex: els.sex.value || "",
-        weight: Number(els.weight.value || 0),
-        height: Number(els.height.value || 0),
-        creatinine: Number(els.scr.value || 0),
-        aki: els.aki.value || "no",
-        krt: els.krt.value || "none",
-        route_preference: els.routePref.value || "ivpo",
-        severity: els.severity.value || "standard",
-        infusion: els.infusion.value || "traditional"
-      };
-    }
-
-    function patientReady(){
-      const p = getPatient();
-      return !!(p.age && p.sex && p.weight && p.height && p.creatinine);
-    }
-
-    function buildFrontPatientMetrics(){
-      const p = getPatient();
-      if(!patientReady()) return null;
-
-      const bmi = calcBMI(p.weight, p.height);
-      const ibw = calcIBW(p.height, p.sex);
-      const adjbw = calcAdjBW(p.weight, ibw);
-      const crclTBW = calcCrCl(p.age, p.sex, p.weight, p.creatinine);
-      const crclAdj = adjbw ? calcCrCl(p.age, p.sex, adjbw, p.creatinine) : null;
-
-      let dosingWeightType = "TBW";
-      let dosingWeight = p.weight;
-
-      if(bmi && bmi >= 30 && adjbw){
-        dosingWeightType = "AdjBW";
-        dosingWeight = adjbw;
-      }
-
-      const crclDosing = calcCrCl(p.age, p.sex, dosingWeight, p.creatinine);
-
-      return {
-        bmi, ibw, adjbw, crclTBW, crclAdj, dosingWeightType, dosingWeight, crclDosing
-      };
-    }
-
-    function updatePatientMetrics(){
-      const metrics = buildFrontPatientMetrics();
-
-      if(!metrics){
-        els.patientStatus.textContent = "Awaiting Input";
-        els.calcBox.textContent = "Patient metrics will be displayed here.";
-        return;
-      }
-
-      els.patientStatus.textContent = "Ready";
-
-      els.calcBox.innerHTML = `
-        <b>Actual BW:</b> ${round1(getPatient().weight)} kg &nbsp; | &nbsp;
-        <b>IBW:</b> ${metrics.ibw ? round1(metrics.ibw) : "—"} kg &nbsp; | &nbsp;
-        <b>AdjBW:</b> ${metrics.adjbw ? round1(metrics.adjbw) : "—"} kg &nbsp; | &nbsp;
-        <b>BMI:</b> ${metrics.bmi ? round1(metrics.bmi) : "—"}<br>
-        <b>CrCl (TBW):</b> ${metrics.crclTBW ? round1(metrics.crclTBW) : "—"} mL/min &nbsp; | &nbsp;
-        <b>CrCl (AdjBW):</b> ${metrics.crclAdj ? round1(metrics.crclAdj) : "—"} mL/min &nbsp; | &nbsp;
-        <b>Dosing Weight:</b> ${metrics.dosingWeight ? round1(metrics.dosingWeight) : "—"} kg (${metrics.dosingWeightType || "—"}) &nbsp; | &nbsp;
-        <b>CrCl (Dosing):</b> ${metrics.crclDosing ? round1(metrics.crclDosing) : "—"} mL/min
-      `;
-    }
 
     async function postAPI(payload){
       const res = await fetch(API_URL, {
@@ -742,389 +449,10 @@
       const data = await res.json().catch(() => ({}));
 
       if(!res.ok){
-        throw new Error(data.error || "API request failed");
+        throw new Error(data.error || data.details || "API request failed");
       }
 
       return data;
-    }
-
-    async function loadDrugs(){
-      try{
-        const data = await postAPI({ action: "get_drugs" });
-        DRUGS = Array.isArray(data.drugs) ? data.drugs : [];
-        populateQuestionDrug();
-
-        if(els.medicationsContainer.children.length === 0){
-          addMedicationRow();
-        } else {
-          refreshAllDrugSelects();
-        }
-      }catch(e){
-        els.reviewResult.innerHTML = `<div class="loading">Failed to load drugs.</div>`;
-      }
-    }
-
-    function populateQuestionDrug(){
-      els.questionDrug.innerHTML = `<option value="">Select a drug</option>`;
-      DRUGS.forEach(drug => {
-        const opt = document.createElement("option");
-        opt.value = drug;
-        opt.textContent = drug;
-        els.questionDrug.appendChild(opt);
-      });
-    }
-
-    function createDrugOptions(select, placeholder = "Select a Drug"){
-      select.innerHTML = "";
-      const first = document.createElement("option");
-      first.value = "";
-      first.textContent = placeholder;
-      select.appendChild(first);
-
-      DRUGS.forEach(drug => {
-        const opt = document.createElement("option");
-        opt.value = drug;
-        opt.textContent = drug;
-        select.appendChild(opt);
-      });
-    }
-
-    function createSimpleOptions(select, items, placeholder){
-      select.innerHTML = "";
-      const first = document.createElement("option");
-      first.value = "";
-      first.textContent = placeholder;
-      select.appendChild(first);
-
-      items.forEach(item => {
-        const opt = document.createElement("option");
-        opt.value = item.value ?? item;
-        opt.textContent = item.label ?? item;
-        select.appendChild(opt);
-      });
-    }
-
-    function refreshAllDrugSelects(){
-      document.querySelectorAll(".drug-select").forEach(select => {
-        const current = select.value;
-        createDrugOptions(select);
-        if(DRUGS.includes(current)) select.value = current;
-      });
-    }
-
-    function addMedicationRow(){
-      medCounter += 1;
-
-      const row = document.createElement("div");
-      row.className = "medication-row";
-      row.dataset.index = medCounter;
-
-      row.innerHTML = `
-        <div class="med-head">
-          <div>Medication ${medCounter}</div>
-          <div></div>
-        </div>
-
-        <div class="med-grid">
-          <div class="field">
-            <label>Drug</label>
-            <select class="drug-select"></select>
-          </div>
-
-          <div class="field">
-            <label>Indication</label>
-            <select class="indication-select" disabled>
-              <option value="">Select drug first</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label>Sub-Pathway</label>
-            <select class="subindication-select" disabled>
-              <option value="">Optional / none</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <button type="button" class="btn-danger remove-med-btn">Remove</button>
-          </div>
-        </div>
-      `;
-
-      els.medicationsContainer.appendChild(row);
-
-      const drugSelect = row.querySelector(".drug-select");
-      const indicationSelect = row.querySelector(".indication-select");
-      const subSelect = row.querySelector(".subindication-select");
-      const removeBtn = row.querySelector(".remove-med-btn");
-
-      createDrugOptions(drugSelect);
-
-      drugSelect.addEventListener("change", async () => {
-        indicationSelect.disabled = true;
-        subSelect.disabled = true;
-        createSimpleOptions(indicationSelect, [], "Loading indications...");
-        createSimpleOptions(subSelect, [], "Optional / none");
-        await loadIndicationsForRow(row);
-      });
-
-      indicationSelect.addEventListener("change", async () => {
-        await loadSubIndicationsForRow(row);
-      });
-
-      removeBtn.addEventListener("click", () => {
-        row.remove();
-        updateTherapyStatus();
-      });
-
-      updateTherapyStatus();
-    }
-
-    function updateTherapyStatus(){
-      const count = document.querySelectorAll(".medication-row").length;
-      els.therapyStatus.textContent = count ? `${count} Medication${count > 1 ? "s" : ""}` : "Awaiting Input";
-    }
-
-    async function loadIndicationsForRow(row){
-      const drug = row.querySelector(".drug-select").value;
-      const indicationSelect = row.querySelector(".indication-select");
-      const subSelect = row.querySelector(".subindication-select");
-
-      if(!drug){
-        indicationSelect.disabled = true;
-        subSelect.disabled = true;
-        createSimpleOptions(indicationSelect, [], "Select drug first");
-        createSimpleOptions(subSelect, [], "Optional / none");
-        return;
-      }
-
-      try{
-        const data = await postAPI({
-          action: "get_indications",
-          drug,
-          patient: getPatient()
-        });
-
-        const indications = Array.isArray(data.indications) ? data.indications : [];
-
-        if(!indications.length){
-          indicationSelect.disabled = true;
-          createSimpleOptions(indicationSelect, [], "No indications found");
-          subSelect.disabled = true;
-          createSimpleOptions(subSelect, [], "Optional / none");
-          return;
-        }
-
-        indicationSelect.disabled = false;
-        createSimpleOptions(
-          indicationSelect,
-          indications.map(ind => ({ value: ind.value || ind, label: ind.label || ind })),
-          "Select an Indication"
-        );
-
-        subSelect.disabled = true;
-        createSimpleOptions(subSelect, [], "Optional / none");
-      }catch(e){
-        indicationSelect.disabled = true;
-        subSelect.disabled = true;
-        createSimpleOptions(indicationSelect, [], "Failed to load");
-        createSimpleOptions(subSelect, [], "Optional / none");
-      }
-    }
-
-    async function loadSubIndicationsForRow(row){
-      const drug = row.querySelector(".drug-select").value;
-      const indication = row.querySelector(".indication-select").value;
-      const subSelect = row.querySelector(".subindication-select");
-
-      if(!drug || !indication){
-        subSelect.disabled = true;
-        createSimpleOptions(subSelect, [], "Optional / none");
-        return;
-      }
-
-      try{
-        const data = await postAPI({
-          action: "get_subindications",
-          drug,
-          indication,
-          patient: getPatient()
-        });
-
-        const sub = Array.isArray(data.subindications) ? data.subindications : [];
-
-        if(!sub.length){
-          subSelect.disabled = true;
-          createSimpleOptions(subSelect, [], "Optional / none");
-          return;
-        }
-
-        subSelect.disabled = false;
-        createSimpleOptions(
-          subSelect,
-          sub.map(item => ({ value: item.value || item, label: item.label || item })),
-          "Select a Sub-Pathway"
-        );
-      }catch(e){
-        subSelect.disabled = true;
-        createSimpleOptions(subSelect, [], "Optional / none");
-      }
-    }
-
-    function collectSelections(){
-      const meds = [];
-
-      document.querySelectorAll(".medication-row").forEach(row => {
-        meds.push({
-          drug: row.querySelector(".drug-select").value || "",
-          indication: row.querySelector(".indication-select").value || "",
-          sub_indication: row.querySelector(".subindication-select").value || ""
-        });
-      });
-
-      return meds.filter(m => m.drug);
-    }
-
-    async function runMedicationReview(){
-      if(!patientReady()){
-        els.reviewResult.innerHTML = `<div class="loading">Please complete patient profile first.</div>`;
-        return;
-      }
-
-      const medications = collectSelections();
-
-      if(!medications.length){
-        els.reviewResult.innerHTML = `<div class="loading">Please add at least one medication.</div>`;
-        return;
-      }
-
-      const missingIndication = medications.some(m => !m.indication);
-      if(missingIndication){
-        els.reviewResult.innerHTML = `<div class="loading">Please select indication for each medication.</div>`;
-        return;
-      }
-
-      els.reviewResult.innerHTML = `<div class="loading">Generating regimen...</div>`;
-
-      try{
-        const data = await postAPI({
-          action: "calculate_review",
-          patient: getPatient(),
-          medications
-        });
-
-        renderReview(data);
-      }catch(e){
-        els.reviewResult.innerHTML = `<div class="loading">${escapeHtml(e.message || "Failed to generate regimen.")}</div>`;
-      }
-    }
-
-    function renderReview(data){
-      if(!data || !data.ok){
-        els.reviewResult.innerHTML = `<div class="loading">No structured output returned.</div>`;
-        return;
-      }
-
-      let html = "";
-
-      const review = Array.isArray(data.medication_review) ? data.medication_review : [];
-
-      if(!review.length){
-        html += `<div class="muted">No regimen output returned.</div>`;
-      }
-
-      review.forEach(item => {
-        html += `
-          <div class="review-card">
-            <h4>${escapeHtml(item.drug || "Medication")}</h4>
-            <div class="review-line"><b>Indication:</b> ${escapeHtml(item.indication || "—")}</div>
-            <div class="review-line"><b>Sub-Pathway:</b> ${escapeHtml(item.sub_indication || "—")}</div>
-            <div class="review-line"><b>Dose:</b> ${escapeHtml(item.recommended_dose || "—")}</div>
-            <div class="review-line"><b>Frequency:</b> ${escapeHtml(item.recommended_frequency || "—")}</div>
-            <div class="review-line"><b>Duration:</b> ${escapeHtml(item.recommended_duration || "—")}</div>
-            <div class="review-line"><b>Administration:</b> ${escapeHtml(item.administration || "—")}</div>
-            <div class="review-line"><b>Monitoring:</b> ${Array.isArray(item.monitoring) && item.monitoring.length ? escapeHtml(item.monitoring.join(", ")) : "—"}</div>
-            <div class="review-line"><b>Strategy:</b> ${escapeHtml(item.therapy_strategy || "—")}</div>
-            <div class="review-line"><b>Evidence:</b> ${Array.isArray(item.evidence) && item.evidence.length ? escapeHtml(item.evidence.join(" | ")) : "—"}</div>
-          </div>
-        `;
-      });
-
-      if(data.ddi_summary && Array.isArray(data.ddi_summary.interactions) && data.ddi_summary.interactions.length){
-        html += `<div class="review-card"><h4>Drug-Drug Interactions</h4>`;
-        data.ddi_summary.interactions.forEach((ddi, idx) => {
-          html += `
-            <div class="review-line"><b>Pair:</b> ${escapeHtml(ddi.pair || "—")}</div>
-            <div class="review-line"><b>Rating:</b> <span class="ddi-badge">${escapeHtml(ddi.rating || "—")}</span></div>
-            <div class="review-line"><b>Management:</b> ${escapeHtml(ddi.management || "—")}</div>
-            ${idx < data.ddi_summary.interactions.length - 1 ? `<hr class="divider">` : ``}
-          `;
-        });
-        html += `</div>`;
-      }
-
-      if(Array.isArray(data.global_warnings) && data.global_warnings.length){
-        html += `<div class="warn-list"><b>Additional Notes</b><br>`;
-        data.global_warnings.forEach(w => {
-          html += `• ${escapeHtml(w)}<br>`;
-        });
-        html += `</div>`;
-      }
-
-      els.reviewResult.innerHTML = html || `<div class="muted">No regimen output returned.</div>`;
-    }
-
-    async function askDrugQuestion(){
-      const drug = els.questionDrug.value;
-      const question = els.questionText.value.trim();
-
-      if(!drug){
-        els.questionResult.innerHTML = `<div class="loading">Please select a drug.</div>`;
-        return;
-      }
-
-      if(!question){
-        els.questionResult.innerHTML = `<div class="loading">Please enter a question.</div>`;
-        return;
-      }
-
-      els.questionResult.innerHTML = `<div class="loading">Searching selected drug monograph...</div>`;
-
-      try{
-        const data = await postAPI({
-          action: "drug_question",
-          drug,
-          question,
-          patient: getPatient()
-        });
-
-        renderDrugAnswer(data);
-      }catch(e){
-        els.questionResult.innerHTML = `<div class="loading">${escapeHtml(e.message || "Failed to get drug answer.")}</div>`;
-      }
-    }
-
-    function renderDrugAnswer(data){
-      if(!data || !data.ok){
-        els.questionResult.innerHTML = `<div class="loading">No answer returned.</div>`;
-        return;
-      }
-
-      let html = `<div class="qa-answer"><b>Answer:</b> ${escapeHtml(data.answer || "—")}</div>`;
-
-      if(Array.isArray(data.evidence) && data.evidence.length){
-        html += `<div><b>Supporting Evidence</b></div>`;
-        data.evidence.forEach(ev => {
-          html += `
-            <div class="quote">
-              "${escapeHtml(ev.quote || "")}"
-              <div class="quote-source">${escapeHtml(ev.source || "Unknown source")}${ev.page ? ` - Page ${escapeHtml(String(ev.page))}` : ""}</div>
-            </div>
-          `;
-        });
-      }
-
-      els.questionResult.innerHTML = html;
     }
 
     function escapeHtml(str){
@@ -1137,57 +465,169 @@
       }[m]));
     }
 
-    function resetForm(){
-      [els.age, els.weight, els.height, els.scr].forEach(i => i.value = "");
-      els.sex.value = "";
-      els.aki.value = "no";
-      els.krt.value = "none";
-      els.routePref.value = "ivpo";
-      els.severity.value = "standard";
-      els.infusion.value = "traditional";
-
-      els.calcBox.textContent = "Patient metrics will be displayed here.";
-      els.patientStatus.textContent = "Awaiting Input";
-
-      els.medicationsContainer.innerHTML = "";
-      medCounter = 0;
-      addMedicationRow();
-
-      els.reviewResult.textContent = "Regimen output will appear here.";
-      els.questionText.value = "";
-      els.questionResult.textContent = "Drug answer and evidence quotes will appear here.";
+    function renderSources(){
+      els.chatSource.innerHTML = `<option value="">Select a source</option>`;
+      SOURCES.forEach(source => {
+        const opt = document.createElement("option");
+        opt.value = source;
+        opt.textContent = source;
+        els.chatSource.appendChild(opt);
+      });
     }
 
-    [els.age, els.sex, els.weight, els.height, els.scr, els.aki, els.krt, els.routePref, els.severity, els.infusion]
-      .forEach(el => {
-        el.addEventListener("input", updatePatientMetrics);
-        el.addEventListener("change", async () => {
-          updatePatientMetrics();
+    async function loadSources(){
+      try{
+        const data = await postAPI({ action: "get_sources" });
+        SOURCES = Array.isArray(data.sources) ? data.sources : [];
+        renderSources();
+      }catch(e){
+        els.chatMessages.innerHTML = `<div class="loading">Failed to load sources.</div>`;
+      }
+    }
 
-          const rows = document.querySelectorAll(".medication-row");
-          for(const row of rows){
-            const drug = row.querySelector(".drug-select").value;
-            const indication = row.querySelector(".indication-select").value;
+    function addUserMessage(text){
+      CHAT_HISTORY.push({
+        role: "user",
+        content: text
+      });
+      renderChat();
+    }
 
-            if(drug){
-              await loadIndicationsForRow(row);
+    function addAssistantMessage(answer, citations = []){
+      CHAT_HISTORY.push({
+        role: "assistant",
+        content: answer,
+        citations
+      });
+      renderChat();
+    }
 
-              if(indication){
-                row.querySelector(".indication-select").value = indication;
-                await loadSubIndicationsForRow(row);
+    function renderChat(){
+      if(!CHAT_HISTORY.length){
+        els.chatMessages.innerHTML = `<div class="empty-state">Choose a source, then start chatting.</div>`;
+        return;
+      }
+
+      let html = "";
+
+      CHAT_HISTORY.forEach(msg => {
+        if(msg.role === "user"){
+          html += `
+            <div class="msg msg-user">
+              <div class="msg-role">You</div>
+              <div class="bubble">${escapeHtml(msg.content)}</div>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="msg msg-assistant">
+              <div class="msg-role">Assistant</div>
+              <div class="bubble">${escapeHtml(msg.content)}</div>
+              ${
+                Array.isArray(msg.citations) && msg.citations.length
+                  ? `<div class="citations">
+                      ${msg.citations.map(c => `
+                        <div class="citation-card">
+                          <div class="citation-meta">
+                            Source: ${escapeHtml(c.source || "Unknown source")}
+                            ${c.page ? ` | Page ${escapeHtml(String(c.page))}` : ""}
+                          </div>
+                          <div class="citation-quote">${escapeHtml(c.quote || "")}</div>
+                        </div>
+                      `).join("")}
+                    </div>`
+                  : ""
               }
-            }
-          }
-        });
+            </div>
+          `;
+        }
       });
 
-    els.addDrugBtn.addEventListener("click", addMedicationRow);
-    els.reviewBtn.addEventListener("click", runMedicationReview);
-    els.askDrugBtn.addEventListener("click", askDrugQuestion);
-    els.resetBtn.addEventListener("click", resetForm);
+      els.chatMessages.innerHTML = html;
+      els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+    }
 
-    updatePatientMetrics();
-    loadDrugs();
+    async function sendChatMessage(){
+      const source = els.chatSource.value;
+      const message = els.chatInput.value.trim();
+      const language = els.chatLanguage.value;
+      const evidenceMode = els.chatEvidenceMode.value;
+
+      if(!source){
+        els.chatMessages.innerHTML = `<div class="loading">Please select a source.</div>`;
+        return;
+      }
+
+      if(!message){
+        els.chatMessages.innerHTML = `<div class="loading">Please enter a message.</div>`;
+        return;
+      }
+
+      addUserMessage(message);
+      els.chatInput.value = "";
+
+      const loadingIndex = CHAT_HISTORY.length;
+      CHAT_HISTORY.push({
+        role: "assistant",
+        content: "Searching selected source...",
+        citations: []
+      });
+      renderChat();
+
+      try{
+        const data = await postAPI({
+          action: "source_chat",
+          source,
+          message,
+          language,
+          evidence_mode: evidenceMode,
+          history: CHAT_HISTORY
+            .filter(m => m.role === "user" || m.role === "assistant")
+            .slice(0, -1)
+            .map(m => ({
+              role: m.role,
+              content: m.content
+            }))
+        });
+
+        CHAT_HISTORY.splice(loadingIndex, 1);
+
+        addAssistantMessage(
+          data.answer || "No answer returned.",
+          Array.isArray(data.citations) ? data.citations : []
+        );
+      }catch(e){
+        CHAT_HISTORY.splice(loadingIndex, 1);
+        addAssistantMessage(e.message || "Failed to get response.", []);
+      }
+    }
+
+    function clearChat(){
+      CHAT_HISTORY = [];
+      renderChat();
+    }
+
+    els.sendChatBtn.addEventListener("click", sendChatMessage);
+
+    els.chatInput.addEventListener("keydown", (e) => {
+      if(e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        sendChatMessage();
+      }
+    });
+
+    els.clearChatBtn.addEventListener("click", clearChat);
+
+    document.querySelectorAll(".chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const chip = btn.dataset.chip || "";
+        els.chatInput.value = chip;
+        els.chatInput.focus();
+      });
+    });
+
+    loadSources();
+    renderChat();
   </script>
 </body>
 </html>
