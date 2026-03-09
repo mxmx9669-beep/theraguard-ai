@@ -165,38 +165,52 @@ function buildPatientMetrics(patient = {}) {
 }
 
 /* =========================
+   MODULE-LEVEL CACHE
+   Cloudflare Workers reuse the same isolate across requests on the same edge node.
+   This cache prevents re-fetching the full file list on every subrequest within
+   and across invocations on the same node. TTL = 5 minutes.
+========================= */
+let _fileCache = null;
+let _fileCacheTime = 0;
+const FILE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+/* =========================
    SOURCE TYPE CLASSIFICATION
 ========================= */
-/**
- * Classifies a filename into one of:
- * "monograph" | "protocol" | "guideline" | "antibiogram" | "tdm" | "unknown"
- */
 function classifySourceType(filename) {
   if (!filename) return "unknown";
   const lower = filename.toLowerCase();
-
   if (/antibiogram/.test(lower)) return "antibiogram";
   if (/\btdm\b|therapeutic\s*drug\s*monitor/.test(lower)) return "tdm";
   if (/protocol/.test(lower)) return "protocol";
   if (/guideline|guidance|guide/.test(lower)) return "guideline";
   if (/monograph|drug\s*information|drug\s*info/.test(lower)) return "monograph";
-
-  // If none matched, default to monograph (most likely a drug file)
   return "monograph";
 }
 
 /* =========================
-   FIX 1 — FULL PAGINATION for vector store files
+   FIX 1 — FULL PAGINATION + MINIMAL SUBREQUESTS
+   
+   KEY CHANGE: The vector store file list endpoint (/vector_stores/{id}/files)
+   already returns a "filename" field on each item in newer OpenAI API versions.
+   We use that directly instead of calling /files/{id} for EVERY file.
+   
+   This reduces subrequests from O(N files) down to O(pages) — typically 1–3 requests
+   for even large vector stores.
+   
+   If filename is missing on an item, we do a single fallback fetch for that item only.
 ========================= */
-/**
- * Fetches ALL files from the vector store using cursor-based pagination.
- * Previously only fetched the first page — now loops until has_more is false.
- */
 async function listVectorStoreFiles(env) {
+  // Return cached result if still fresh
+  const now = Date.now();
+  if (_fileCache && (now - _fileCacheTime) < FILE_CACHE_TTL_MS) {
+    return _fileCache;
+  }
+
   const out = [];
   let after = null;
   let pageCount = 0;
-  const MAX_PAGES = 50; // safety cap
+  const MAX_PAGES = 20; // 20 pages × 100 files = up to 2000 files, well within limits
 
   while (pageCount < MAX_PAGES) {
     pageCount++;
@@ -216,31 +230,42 @@ async function listVectorStoreFiles(env) {
       const fileId = item.id || item.file_id;
       if (!fileId) continue;
 
-      try {
-        const fileObj = await openaiFetch(env, `/files/${fileId}`, { method: "GET" });
-        const filename = fileObj?.filename || "";
-        const displayName = cleanSourceName(filename);
-        const sourceType = classifySourceType(filename);
+      // Use filename directly from the list response (no extra subrequest needed)
+      // The OpenAI vector store files endpoint includes filename on each item
+      let filename = item.filename || "";
 
-        out.push({
-          file_id: fileId,
-          filename,
-          drug_name: displayName, // kept for backward-compat
-          display_name: displayName,
-          source_type: sourceType,
-        });
-      } catch (_) {
-        // Skip files that can't be fetched individually
+      // Only fetch individually if filename is genuinely missing
+      if (!filename) {
+        try {
+          const fileObj = await openaiFetch(env, `/files/${fileId}`, { method: "GET" });
+          filename = fileObj?.filename || fileId;
+        } catch (_) {
+          filename = fileId; // fallback to ID as name
+        }
       }
+
+      const displayName = cleanSourceName(filename);
+      const sourceType = classifySourceType(filename);
+
+      out.push({
+        file_id: fileId,
+        filename,
+        drug_name: displayName,   // kept for backward-compat
+        display_name: displayName,
+        source_type: sourceType,
+      });
     }
 
-    // Pagination: continue if there are more pages
     if (vsFiles.has_more && items.length > 0) {
       after = items[items.length - 1].id;
     } else {
       break;
     }
   }
+
+  // Store in module-level cache
+  _fileCache = out;
+  _fileCacheTime = now;
 
   return out;
 }
