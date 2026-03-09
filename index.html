@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MediVance AI - Clinical Knowledge Chat</title>
+  <title>MediVance AI</title>
   <style>
     :root{
       --bg:#f4f7fb;
@@ -11,623 +11,1380 @@
       --line:#d9e3ee;
       --text:#223246;
       --muted:#6d7f95;
-
+      --blue:#4f93c9;
+      --blue-dark:#2f6f9f;
+      --green:#8fb9a0;
+      --green-dark:#5e8e72;
       --navy:#123253;
-      --blue:#2f7ec7;
-      --blue-dark:#2067a8;
-
-      --soft:#f8fbfe;
+      --btn:#2f7ec7;
+      --btn-dark:#2067a8;
+      --soft:#f8fbff;
+      --soft2:#eef5fb;
+      --danger-bg:#faecec;
+      --danger-text:#a63f3f;
+      --danger-line:#efc8c8;
+      --warning-bg:#fff7e9;
+      --warning-line:#efd7a5;
       --shadow:0 4px 16px rgba(16,42,67,.06);
     }
-
     *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;padding:12px}
+    .app{max-width:1150px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#ffffff,#fbfdff)}
+    .brand-wrap{display:flex;align-items:center;gap:12px}
+    .logo-box{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#1e4f87,#46a4d9 55%,#8fd0b4);position:relative;box-shadow:0 6px 14px rgba(30,79,135,.18);flex:0 0 42px}
+    .logo-box::before{content:"";position:absolute;left:10px;top:8px;width:22px;height:26px;background:#fff;clip-path:polygon(44% 0,56% 0,56% 34%,100% 34%,100% 48%,56% 48%,56% 100%,44% 100%,44% 48%,0 48%,0 34%,44% 34%);border-radius:2px}
+    .logo-box::after{content:"";position:absolute;right:6px;bottom:6px;width:9px;height:9px;border-radius:50%;background:#dff7ea;box-shadow:0 0 0 3px rgba(255,255,255,.55)}
+    .brand-title{font-size:20px;font-weight:800;color:#1d5d8e;line-height:1.05;letter-spacing:.2px}
+    .brand-sub{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.2px}
+    .credit{font-size:12px;color:#617286;font-weight:700;text-align:right;white-space:nowrap}
+    .content{padding:14px;background:#f8fbfd}
+    .section{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:14px;overflow:hidden}
+    .section-bar{min-height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-weight:800;color:#fff;font-size:14px}
+    .bar-blue{background:linear-gradient(90deg,var(--blue),#6eaad7)}
+    .bar-green{background:linear-gradient(90deg,var(--green),#a4c9b2)}
+    .bar-navy{background:linear-gradient(90deg,var(--navy),#2a4c74)}
+    .status-pill{font-size:11px;background:rgba(255,255,255,.9);color:#46576c;border:1px solid rgba(0,0,0,.06);padding:5px 10px;border-radius:999px;font-weight:800}
+    .section-body{padding:14px}
+    .grid-6{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .field{display:flex;flex-direction:column;gap:5px}
+    label{font-size:12px;font-weight:800;color:#5a6f86}
+    .input-wrap{display:flex;align-items:center;gap:6px}
+    input,select,textarea{width:100%;min-width:0;border:1px solid #ccd7e4;border-radius:8px;background:#fff;color:#203041;font-size:14px;padding:10px 11px;outline:none}
+    input:focus,select:focus,textarea:focus{border-color:var(--btn);box-shadow:0 0 0 3px rgba(47,126,199,.12)}
+    .unit{width:74px;flex:0 0 74px;text-align:center;background:#f5f8fb;color:#6a7b90;border:1px solid #ccd7e4;border-radius:8px;padding:10px 6px;font-size:12px;font-weight:800}
+    .metrics-box{margin-top:12px;background:linear-gradient(180deg,#edf5fc,#f5f9fd);border:1px solid #d8e7f4;color:#46647f;border-radius:8px;padding:11px 13px;font-size:13px;line-height:1.8}
+    .metrics-box b{color:#29496d}
+    .medication-row{border:1px dashed #d4deea;border-radius:10px;padding:12px;margin-bottom:12px;background:#fcfdff}
+    .med-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:13px;color:#607388;font-weight:800}
+    .med-grid{display:grid;grid-template-columns:2fr 2fr 2fr auto;gap:10px;align-items:end}
+    .btn-row{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;flex-wrap:wrap}
+    button{border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;transition:.15s ease}
+    .btn-primary{background:var(--btn);color:#fff}
+    .btn-primary:hover{background:var(--btn-dark)}
+    .btn-secondary{background:#eef2f6;color:#495d74;border:1px solid #d6dee8}
+    .btn-danger{background:var(--danger-bg);color:var(--danger-text);border:1px solid var(--danger-line);padding:10px 12px}
+    .review-box{margin-top:12px;background:#f8fbfe;border:1px solid #dbe8f4;border-radius:8px;padding:12px;min-height:70px}
+    .review-card{border:1px solid #d9e3ee;border-radius:10px;background:#fff;padding:12px;margin-bottom:10px}
+    .review-card h4{margin:0 0 10px;color:#1f456a;font-size:15px}
+    .review-line{font-size:13px;margin:4px 0;line-height:1.65}
+    .review-line b{color:#324f6d}
+    .ddi-badge{display:inline-block;min-width:24px;text-align:center;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid #d7dee8;background:#f4f7fa;color:#334b62}
+    .warn-list{margin-top:10px;padding:10px 12px;background:var(--warning-bg);border:1px solid var(--warning-line);border-radius:10px;font-size:13px;line-height:1.7}
+    .footer{text-align:center;padding:12px 16px 16px;color:#7b8798;font-size:11px}
+    .footer .credit2{margin-top:8px;font-weight:800;color:#5e6c80}
+    .loading{color:#6b7a90;font-style:italic}
+    .muted{color:#6b7a90;font-size:13px}
+    .divider{border:none;border-top:1px solid #e6edf4;margin:10px 0}
 
-    body{
-      margin:0;
-      background:var(--bg);
-      color:var(--text);
-      font-family:Arial, Helvetica, sans-serif;
-      padding:16px;
-    }
-
-    .app{
-      max-width:1100px;
-      margin:0 auto;
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:14px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:16px 18px;
-      border-bottom:1px solid var(--line);
-      background:linear-gradient(180deg,#ffffff,#fbfdff);
-    }
-
-    .brand-wrap{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-
-    .logo-box{
-      width:42px;
-      height:42px;
-      border-radius:12px;
-      background:linear-gradient(135deg,#1e4f87,#46a4d9 55%,#8fd0b4);
-      position:relative;
-      box-shadow:0 6px 14px rgba(30,79,135,.18);
-      flex:0 0 42px;
-    }
-
-    .logo-box::before{
-      content:"";
-      position:absolute;
-      left:10px;
-      top:8px;
-      width:22px;
-      height:26px;
-      background:#fff;
-      clip-path:polygon(44% 0,56% 0,56% 34%,100% 34%,100% 48%,56% 48%,56% 100%,44% 100%,44% 48%,0 48%,0 34%,44% 34%);
-      border-radius:2px;
-    }
-
-    .brand-sub{
-      font-size:11px;
-      color:var(--muted);
-      margin-top:4px;
-      letter-spacing:.2px;
-    }
-
-    .brand-title{
-      font-size:20px;
-      font-weight:800;
-      color:#1d5d8e;
-      line-height:1.05;
-      letter-spacing:.2px;
-    }
-
-    .credit{
-      font-size:12px;
-      color:#617286;
-      font-weight:700;
-      text-align:right;
-      white-space:nowrap;
-    }
-
-    .content{
-      padding:14px;
-      background:#f8fbfd;
-    }
-
-    .section{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:10px;
-      overflow:hidden;
-    }
-
-    .section-bar{
-      min-height:46px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:0 14px;
-      font-weight:800;
-      color:#fff;
-      font-size:14px;
-      background:linear-gradient(90deg,var(--navy),#2a4c74);
-    }
-
-    .status-pill{
-      font-size:11px;
-      background:rgba(255,255,255,.9);
-      color:#46576c;
-      border:1px solid rgba(0,0,0,.06);
-      padding:5px 10px;
-      border-radius:999px;
-      font-weight:800;
-    }
-
-    .section-body{
-      padding:14px;
-    }
-
-    .grid-4{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:12px;
-    }
-
-    .field{
+    /* =====================
+       ADVANCED CHATBOT STYLES
+    ===================== */
+    .chat-container{
       display:flex;
       flex-direction:column;
-      gap:6px;
+      height:520px;
+      border:1px solid #d0dcea;
+      border-radius:12px;
+      overflow:hidden;
+      background:#f7fafd;
+      margin-top:14px;
     }
-
-    label{
+    .chat-source-bar{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      background:linear-gradient(90deg,#f0f6fc,#f8fbff);
+      border-bottom:1px solid #dae6f2;
+      flex-wrap:wrap;
+    }
+    .chat-source-bar label{
       font-size:12px;
-      font-weight:800;
       color:#5a6f86;
+      white-space:nowrap;
+      margin:0;
     }
-
-    input, select, textarea{
-      width:100%;
-      min-width:0;
-      border:1px solid #ccd7e4;
+    .chat-source-bar select{
+      min-width:180px;
+      max-width:280px;
+      font-size:13px;
+      padding:7px 10px;
       border-radius:8px;
+      border:1px solid #c4d4e4;
       background:#fff;
       color:#203041;
-      font-size:14px;
-      padding:10px 11px;
-      outline:none;
     }
-
-    input:focus, select:focus, textarea:focus{
-      border-color:var(--blue);
-      box-shadow:0 0 0 3px rgba(47,126,199,.12);
-    }
-
-    textarea{
-      resize:vertical;
-    }
-
-    .btn-row{
-      display:flex;
-      justify-content:flex-end;
-      gap:8px;
-      margin-top:12px;
-      flex-wrap:wrap;
-    }
-
-    button{
-      border:none;
-      border-radius:8px;
-      padding:10px 16px;
-      font-size:13px;
+    .chat-source-badge{
+      font-size:11px;
+      padding:4px 10px;
+      border-radius:999px;
       font-weight:800;
-      cursor:pointer;
-      transition:.15s ease;
+      border:1px solid;
+      white-space:nowrap;
     }
+    .badge-monograph{background:#eaf3fb;color:#2566a0;border-color:#b8d6ef}
+    .badge-protocol{background:#eaf7ee;color:#2a6e44;border-color:#b0d9bf}
+    .badge-guideline{background:#f3eeff;color:#5b35a0;border-color:#c9b5f0}
+    .badge-antibiogram{background:#fff4e0;color:#8a5800;border-color:#e0c070}
+    .badge-tdm{background:#fef0f0;color:#9b2222;border-color:#f0baba}
+    .badge-unknown{background:#f0f2f4;color:#667;border-color:#ccc}
 
-    .btn-primary{
-      background:var(--blue);
-      color:#fff;
-    }
-
-    .btn-primary:hover{background:var(--blue-dark)}
-
-    .btn-secondary{
-      background:#eef2f6;
-      color:#495d74;
-      border:1px solid #d6dee8;
-    }
-
-    .chat-box{
-      margin-top:14px;
-      background:var(--soft);
-      border:1px solid #dbe8f4;
-      border-radius:10px;
+    .chat-messages{
+      flex:1;
+      overflow-y:auto;
       padding:14px;
-      min-height:360px;
-      max-height:620px;
-      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      scroll-behavior:smooth;
     }
-
-    .empty-state{
-      color:#6b7a90;
-      font-size:14px;
-    }
+    .chat-messages::-webkit-scrollbar{width:5px}
+    .chat-messages::-webkit-scrollbar-thumb{background:#cdd8e8;border-radius:4px}
 
     .msg{
-      margin-bottom:14px;
+      display:flex;
+      gap:10px;
+      max-width:92%;
+      animation:fadeIn .2s ease;
     }
+    @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 
-    .bubble{
+    .msg-user{align-self:flex-end;flex-direction:row-reverse}
+    .msg-bot{align-self:flex-start}
+
+    .msg-avatar{
+      width:32px;height:32px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:14px;flex:0 0 32px;
+      font-weight:800;
+    }
+    .avatar-user{background:linear-gradient(135deg,#2f7ec7,#46a4d9);color:#fff}
+    .avatar-bot{background:linear-gradient(135deg,#1e4f87,#46a4d9 55%,#8fd0b4);color:#fff}
+
+    .msg-bubble{
+      padding:10px 13px;
       border-radius:12px;
-      padding:12px 14px;
-      line-height:1.7;
-      font-size:14px;
-      white-space:pre-wrap;
+      font-size:13.5px;
+      line-height:1.65;
+      max-width:100%;
       word-break:break-word;
     }
-
-    .msg-user .bubble{
-      background:#dfeefe;
-      border:1px solid #c6ddf6;
-      margin-left:auto;
-      max-width:80%;
+    .bubble-user{
+      background:linear-gradient(135deg,#2f7ec7,#3a8fd0);
+      color:#fff;
+      border-bottom-right-radius:4px;
     }
-
-    .msg-assistant .bubble{
+    .bubble-bot{
       background:#fff;
-      border:1px solid #d9e3ee;
-      max-width:88%;
+      color:#223246;
+      border:1px solid #dce8f4;
+      border-bottom-left-radius:4px;
+      box-shadow:0 1px 4px rgba(0,0,0,.04);
     }
+    .bubble-bot b{color:#1a3f6a}
 
-    .msg-role{
+    .correction-notice{
+      display:flex;
+      align-items:flex-start;
+      gap:7px;
+      background:#fff9e8;
+      border:1px solid #f0d890;
+      border-radius:8px;
+      padding:7px 10px;
+      font-size:12px;
+      color:#7a5a00;
+      margin-bottom:8px;
+    }
+    .correction-notice .icon{font-size:14px;flex:0 0 16px}
+
+    .evidence-block{
+      margin-top:8px;
+      border-top:1px solid #e8f0f8;
+      padding-top:8px;
+    }
+    .evidence-label{
       font-size:11px;
       font-weight:800;
-      color:#6b7a90;
+      color:#7a90a8;
+      text-transform:uppercase;
+      letter-spacing:.5px;
       margin-bottom:5px;
     }
-
-    .citations{
-      margin-top:8px;
-      padding-left:10px;
-    }
-
-    .citation-card{
-      margin-top:8px;
-      background:#fff;
-      border-left:4px solid var(--blue);
-      border-radius:8px;
-      padding:10px 12px;
-      border-top:1px solid #d9e3ee;
-      border-right:1px solid #d9e3ee;
-      border-bottom:1px solid #d9e3ee;
-    }
-
-    .citation-meta{
+    .evidence-quote{
+      background:#f2f8ff;
+      border-left:3px solid #4f93c9;
+      padding:7px 10px;
+      border-radius:6px;
       font-size:12px;
+      color:#334f6a;
+      margin-bottom:5px;
+      line-height:1.55;
+    }
+    .evidence-source{
+      font-size:11px;
+      color:#7a90a8;
       font-weight:800;
-      color:#56697f;
-      margin-bottom:6px;
+      margin-top:3px;
     }
 
-    .citation-quote{
-      font-size:13px;
-      line-height:1.65;
-      color:#223246;
-      white-space:pre-wrap;
+    .chat-typing{
+      display:flex;
+      align-items:center;
+      gap:5px;
+      padding:4px 0;
     }
+    .typing-dot{
+      width:7px;height:7px;
+      background:#9bb5cc;
+      border-radius:50%;
+      animation:typingBounce 1.2s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2){animation-delay:.2s}
+    .typing-dot:nth-child(3){animation-delay:.4s}
+    @keyframes typingBounce{0%,80%,100%{transform:scale(0.7);opacity:.5}40%{transform:scale(1);opacity:1}}
 
-    .chip-row{
+    .chat-suggestions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      padding:6px 14px 8px;
+      border-top:1px solid #e8f0f8;
+      background:#fafcff;
+    }
+    .suggestion-chip{
+      background:#edf4fb;
+      color:#2a5a8e;
+      border:1px solid #c4d8ee;
+      border-radius:20px;
+      padding:5px 12px;
+      font-size:12px;
+      cursor:pointer;
+      transition:.15s;
+      font-weight:700;
+    }
+    .suggestion-chip:hover{background:#dcedf9;border-color:#a0c3e0}
+
+    .chat-input-area{
       display:flex;
       gap:8px;
-      flex-wrap:wrap;
-      margin-top:12px;
+      padding:10px 12px;
+      border-top:1px solid #dce8f4;
+      background:#fff;
+      align-items:flex-end;
     }
+    .chat-input-wrap{
+      flex:1;
+      position:relative;
+    }
+    #chatInput{
+      width:100%;
+      border:1px solid #c4d4e4;
+      border-radius:10px;
+      padding:10px 40px 10px 13px;
+      font-size:14px;
+      resize:none;
+      min-height:42px;
+      max-height:110px;
+      line-height:1.5;
+      overflow-y:auto;
+      font-family:inherit;
+      transition:border-color .15s, box-shadow .15s;
+    }
+    #chatInput:focus{
+      border-color:var(--btn);
+      box-shadow:0 0 0 3px rgba(47,126,199,.12);
+      outline:none;
+    }
+    .chat-send-btn{
+      background:var(--btn);
+      color:#fff;
+      border:none;
+      border-radius:10px;
+      width:42px;
+      height:42px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      flex:0 0 42px;
+      font-size:18px;
+      transition:.15s;
+    }
+    .chat-send-btn:hover{background:var(--btn-dark)}
+    .chat-send-btn:disabled{background:#a0bcd8;cursor:not-allowed}
 
-    .chip{
-      background:#eef2f6;
-      color:#495d74;
-      border:1px solid #d6dee8;
-      border-radius:999px;
-      padding:8px 12px;
+    .chat-clear-btn{
+      background:#f0f4f8;
+      color:#607080;
+      border:1px solid #d0dcea;
+      border-radius:8px;
+      padding:0 10px;
+      height:42px;
       font-size:12px;
       font-weight:800;
       cursor:pointer;
+      white-space:nowrap;
     }
+    .chat-clear-btn:hover{background:#e4eaf1}
 
-    .loading{
-      color:#6b7a90;
-      font-style:italic;
-      font-size:14px;
-    }
-
-    .footer{
+    .empty-state{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      color:#a0b0c4;
+      gap:10px;
+      padding:20px;
       text-align:center;
-      padding:12px 16px 16px;
-      color:#7b8798;
-      font-size:11px;
     }
+    .empty-icon{font-size:40px;opacity:.5}
+    .empty-text{font-size:13px;line-height:1.6}
 
-    .footer .credit2{
-      margin-top:8px;
-      font-weight:800;
-      color:#5e6c80;
-    }
-
-    @media (max-width: 900px){
+    @media (max-width: 980px){
+      .grid-6{grid-template-columns:repeat(2,1fr)}
       .grid-4{grid-template-columns:repeat(2,1fr)}
+      .med-grid{grid-template-columns:1fr}
       .credit{display:none}
     }
-
     @media (max-width: 640px){
-      .topbar{flex-direction:column; align-items:flex-start}
-      .grid-4{grid-template-columns:1fr}
+      .topbar{flex-direction:column;align-items:flex-start;gap:8px}
+      .grid-6,.grid-4{grid-template-columns:1fr}
+      .btn-row{justify-content:stretch}
       .btn-row button{width:100%}
-      .msg-user .bubble,
-      .msg-assistant .bubble{max-width:100%}
+      .chat-container{height:420px}
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="topbar">
-      <div class="brand-wrap">
-        <div class="logo-box"></div>
-        <div>
-          <div class="brand-title">MediVance AI</div>
-          <div class="brand-sub">Clinical Knowledge Chat</div>
-        </div>
-      </div>
-      <div class="credit">Designed &amp; Innovated by Mohammed Al-Ishaq</div>
-    </div>
-
-    <div class="content">
-      <div class="section">
-        <div class="section-bar">
-          <div>Drug Knowledge Assistant</div>
-          <div class="status-pill">Source-Locked Chat</div>
-        </div>
-
-        <div class="section-body">
-          <div class="grid-4">
-            <div class="field">
-              <label>Source</label>
-              <select id="chatSource">
-                <option value="">Select a source</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Language Mode</label>
-              <select id="chatLanguage">
-                <option value="auto">Auto</option>
-                <option value="en">English</option>
-                <option value="ar">Arabic</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Evidence Mode</label>
-              <select id="chatEvidenceMode">
-                <option value="standard">Standard</option>
-                <option value="strict">Strict</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Conversation</label>
-              <button class="btn-secondary" id="clearChatBtn" type="button">Clear Chat</button>
-            </div>
-          </div>
-
-          <div class="chip-row">
-            <button class="chip" type="button" data-chip="What are the main indications?">Indications</button>
-            <button class="chip" type="button" data-chip="What is the recommended dose?">Dose</button>
-            <button class="chip" type="button" data-chip="What about renal adjustment?">Renal</button>
-            <button class="chip" type="button" data-chip="What monitoring is required?">Monitoring</button>
-            <button class="chip" type="button" data-chip="What is the administration method?">Administration</button>
-            <button class="chip" type="button" data-chip="Quote the relevant text.">Quote</button>
-          </div>
-
-          <div class="chat-box" id="chatMessages">
-            <div class="empty-state">Choose a source, then start chatting.</div>
-          </div>
-
-          <div style="margin-top:14px;">
-            <label>Message</label>
-            <textarea id="chatInput" rows="4" placeholder="Ask in Arabic or English. Typos are okay."></textarea>
-          </div>
-
-          <div class="btn-row">
-            <button class="btn-primary" id="sendChatBtn" type="button">Send</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="footer">
-        Clinical knowledge assistant. Always verify with institutional protocols.
-        <div class="credit2">Designed &amp; Innovated by Mohammed Al-Ishaq</div>
+<div class="app">
+  <div class="topbar">
+    <div class="brand-wrap">
+      <div class="logo-box"></div>
+      <div>
+        <div class="brand-title">MediVance AI</div>
+        <div class="brand-sub">Clinical Dosing &amp; Drug Interaction Platform</div>
       </div>
     </div>
+    <div class="credit">Designed &amp; Innovated by Mohammed Al-Ishaq</div>
   </div>
 
-  <script>
-    const API_URL = "/api/ask";
-    let SOURCES = [];
-    let CHAT_HISTORY = [];
+  <div class="content">
 
-    const els = {
-      chatSource: document.getElementById("chatSource"),
-      chatLanguage: document.getElementById("chatLanguage"),
-      chatEvidenceMode: document.getElementById("chatEvidenceMode"),
-      clearChatBtn: document.getElementById("clearChatBtn"),
-      chatMessages: document.getElementById("chatMessages"),
-      chatInput: document.getElementById("chatInput"),
-      sendChatBtn: document.getElementById("sendChatBtn")
+    <!-- Patient -->
+    <div class="section" id="step1">
+      <div class="section-bar bar-blue">
+        <div>Patient Profile</div>
+        <div class="status-pill" id="patientStatus">Awaiting Input</div>
+      </div>
+      <div class="section-body">
+        <div class="grid-6">
+          <div class="field">
+            <label>Age</label>
+            <div class="input-wrap">
+              <input id="age" type="number" min="0">
+              <div class="unit">years</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Sex</label>
+            <select id="sex">
+              <option value="">Select</option>
+              <option value="M">Male</option>
+              <option value="F">Female</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Weight</label>
+            <div class="input-wrap">
+              <input id="weight" type="number" step="0.1" min="0">
+              <div class="unit">kg</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Height</label>
+            <div class="input-wrap">
+              <input id="height" type="number" step="0.1" min="0">
+              <div class="unit">cm</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Serum Creatinine</label>
+            <div class="input-wrap">
+              <input id="scr" type="number" step="0.1" min="0">
+              <div class="unit">µmol/L</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>AKI</label>
+            <select id="aki">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Renal Replacement</label>
+            <select id="krt">
+              <option value="none">None</option>
+              <option value="ihd">Intermittent HD</option>
+              <option value="pd">Peritoneal dialysis</option>
+              <option value="crrt">CRRT</option>
+              <option value="pirrt">PIRRT / SLED</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Preferred Route</label>
+            <select id="routePref">
+              <option value="ivpo">IV/PO</option>
+              <option value="iv">IV</option>
+              <option value="po">PO</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Severity</label>
+            <select id="severity">
+              <option value="standard">Standard</option>
+              <option value="severe">Severe</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Infusion Preference</label>
+            <select id="infusion">
+              <option value="traditional">Traditional</option>
+              <option value="extended">Extended</option>
+              <option value="continuous">Continuous</option>
+            </select>
+          </div>
+        </div>
+        <div class="metrics-box" id="calcBox">Patient metrics will be displayed here.</div>
+      </div>
+    </div>
+
+    <!-- Therapeutic Selection -->
+    <div class="section" id="step2">
+      <div class="section-bar bar-green">
+        <div>Therapeutic Selection</div>
+        <div class="status-pill" id="therapyStatus">Awaiting Input</div>
+      </div>
+      <div class="section-body">
+        <div id="medicationsContainer"></div>
+        <div class="btn-row">
+          <button class="btn-secondary" id="resetBtn" type="button">Reset</button>
+          <button class="btn-secondary" id="addDrugBtn" type="button">Add Drug</button>
+          <button class="btn-primary" id="reviewBtn" type="button">Generate Regimen</button>
+        </div>
+        <div class="review-box" id="reviewResult">Regimen output will appear here.</div>
+      </div>
+    </div>
+
+    <!-- Drug Knowledge Assistant — Advanced Chatbot -->
+    <div class="section" id="step3">
+      <div class="section-bar bar-navy">
+        <div>Drug Knowledge Assistant</div>
+        <div class="status-pill" id="chatStatusPill">Monograph Q&amp;A</div>
+      </div>
+      <div class="section-body" style="padding-bottom:6px">
+
+        <!-- Source selector bar -->
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">
+          <div class="field" style="flex:1;min-width:180px;max-width:280px;gap:4px">
+            <label>Knowledge Source</label>
+            <select id="questionDrug">
+              <option value="">Select a source</option>
+            </select>
+          </div>
+          <div style="margin-top:18px">
+            <span id="sourceTypeBadge" class="chat-source-badge badge-unknown" style="display:none"></span>
+          </div>
+          <div style="margin-top:18px;margin-left:auto">
+            <button class="chat-clear-btn" id="clearChatBtn" type="button">🗑 Clear Chat</button>
+          </div>
+        </div>
+
+        <!-- Chat window -->
+        <div class="chat-container" id="chatContainer">
+          <div class="chat-messages" id="chatMessages">
+            <div class="empty-state" id="emptyState">
+              <div class="empty-icon">💊</div>
+              <div class="empty-text">
+                Select a knowledge source above, then ask anything.<br>
+                <span style="font-size:11px;color:#b0c0d0">Supports natural language, medical abbreviations &amp; spelling correction</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Smart suggestions -->
+          <div class="chat-suggestions" id="chatSuggestions" style="display:none"></div>
+
+          <!-- Input area -->
+          <div class="chat-input-area">
+            <div class="chat-input-wrap">
+              <textarea id="chatInput" rows="1" placeholder="Ask anything about the selected source… (e.g. 'What is the dose for renal impairment?')"></textarea>
+            </div>
+            <button class="chat-send-btn" id="chatSendBtn" title="Send" disabled>➤</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+      Clinical decision support tool. Always verify with institutional protocols.
+      <div class="credit2">Designed &amp; Innovated by Mohammed Al-Ishaq</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_URL = "/api/ask";
+  let SOURCES = []; // renamed from DRUGS — now source-aware
+  let medCounter = 0;
+  let chatHistory = []; // conversation memory
+  let currentSourceType = "unknown";
+  let isChatLoading = false;
+
+  /* =====================
+     Patient elements
+  ===================== */
+  const els = {
+    age: document.getElementById("age"),
+    sex: document.getElementById("sex"),
+    weight: document.getElementById("weight"),
+    height: document.getElementById("height"),
+    scr: document.getElementById("scr"),
+    aki: document.getElementById("aki"),
+    krt: document.getElementById("krt"),
+    routePref: document.getElementById("routePref"),
+    severity: document.getElementById("severity"),
+    infusion: document.getElementById("infusion"),
+    calcBox: document.getElementById("calcBox"),
+    patientStatus: document.getElementById("patientStatus"),
+    therapyStatus: document.getElementById("therapyStatus"),
+    medicationsContainer: document.getElementById("medicationsContainer"),
+    addDrugBtn: document.getElementById("addDrugBtn"),
+    resetBtn: document.getElementById("resetBtn"),
+    reviewBtn: document.getElementById("reviewBtn"),
+    reviewResult: document.getElementById("reviewResult"),
+    // Chat
+    questionDrug: document.getElementById("questionDrug"),
+    chatMessages: document.getElementById("chatMessages"),
+    chatInput: document.getElementById("chatInput"),
+    chatSendBtn: document.getElementById("chatSendBtn"),
+    clearChatBtn: document.getElementById("clearChatBtn"),
+    chatSuggestions: document.getElementById("chatSuggestions"),
+    chatStatusPill: document.getElementById("chatStatusPill"),
+    sourceTypeBadge: document.getElementById("sourceTypeBadge"),
+    emptyState: document.getElementById("emptyState"),
+  };
+
+  /* =====================
+     NLP UTILITIES
+  ===================== */
+
+  // Common medical abbreviation expansions
+  const ABBREV_MAP = {
+    "po": "oral",
+    "iv": "intravenous",
+    "im": "intramuscular",
+    "sc": "subcutaneous",
+    "bid": "twice daily",
+    "tid": "three times daily",
+    "qid": "four times daily",
+    "qd": "once daily",
+    "oad": "once daily",
+    "prn": "as needed",
+    "sos": "as needed",
+    "hd": "hemodialysis",
+    "ihd": "intermittent hemodialysis",
+    "crrt": "continuous renal replacement therapy",
+    "aki": "acute kidney injury",
+    "ckd": "chronic kidney disease",
+    "uti": "urinary tract infection",
+    "cai": "community-acquired infection",
+    "cap": "community-acquired pneumonia",
+    "hap": "hospital-acquired pneumonia",
+    "vap": "ventilator-associated pneumonia",
+    "bsa": "body surface area",
+    "tbw": "total body weight",
+    "ibw": "ideal body weight",
+    "adjbw": "adjusted body weight",
+    "crcl": "creatinine clearance",
+    "scr": "serum creatinine",
+    "tdm": "therapeutic drug monitoring",
+    "mrsa": "methicillin-resistant staphylococcus aureus",
+    "mssa": "methicillin-sensitive staphylococcus aureus",
+    "vre": "vancomycin-resistant enterococcus",
+    "esbl": "extended-spectrum beta-lactamase",
+    "kpc": "klebsiella pneumoniae carbapenemase",
+    "mdr": "multidrug-resistant",
+    "xdr": "extensively drug-resistant",
+    "mic": "minimum inhibitory concentration",
+    "auc": "area under the curve",
+    "ddi": "drug-drug interaction",
+    "gi": "gastrointestinal",
+    "cns": "central nervous system",
+    "icu": "intensive care unit",
+    "sepsis": "sepsis",
+    "pna": "pneumonia",
+    "abx": "antibiotics",
+    "cx": "culture",
+    "wbc": "white blood cell",
+    "ldh": "lactate dehydrogenase",
+    "alt": "alanine aminotransferase",
+    "ast": "aspartate aminotransferase",
+    "uln": "upper limit of normal"
+  };
+
+  // Simple phonetic typo correction dictionary for common drug-related words
+  const TYPO_MAP = {
+    "vancomicin": "vancomycin",
+    "vancomisin": "vancomycin",
+    "vankomisin": "vancomycin",
+    "meropenam": "meropenem",
+    "meropenim": "meropenem",
+    "piperasilin": "piperacillin",
+    "piperacillin": "piperacillin",
+    "tazobactum": "tazobactam",
+    "tazobaktam": "tazobactam",
+    "ceftriaxon": "ceftriaxone",
+    "ceftriazone": "ceftriaxone",
+    "azithromicin": "azithromycin",
+    "azithromysin": "azithromycin",
+    "ciprofloxasin": "ciprofloxacin",
+    "ciproflaxacin": "ciprofloxacin",
+    "levoflaxacin": "levofloxacin",
+    "amoxicillin": "amoxicillin",
+    "amoxicilin": "amoxicillin",
+    "clavulanic": "clavulanic",
+    "clavulanic acid": "clavulanic acid",
+    "gentamicin": "gentamicin",
+    "gentamisin": "gentamicin",
+    "amikacin": "amikacin",
+    "amikasine": "amikacin",
+    "linezolid": "linezolid",
+    "linezolide": "linezolid",
+    "daptomicin": "daptomycin",
+    "daptomysin": "daptomycin",
+    "colistin": "colistin",
+    "collistin": "colistin",
+    "colistine": "colistin",
+    "tigeciclin": "tigecycline",
+    "tigecyclin": "tigecycline",
+    "rifampin": "rifampicin",
+    "rifampisine": "rifampicin",
+    "metronidazol": "metronidazole",
+    "metronidazole": "metronidazole",
+    "fluconazol": "fluconazole",
+    "voriconazol": "voriconazole",
+    "anidulafungin": "anidulafungin",
+    "caspofungin": "caspofungin",
+    "micafungin": "micafungin",
+    "amphotericin": "amphotericin",
+    "amphotericine": "amphotericin",
+    "warfarin": "warfarin",
+    "warfarine": "warfarin",
+    "heparin": "heparin",
+    "dose": "dose",
+    "dosis": "dose",
+    "doze": "dose",
+    "dosage": "dosage",
+    "renal": "renal",
+    "rennal": "renal",
+    "dialysis": "dialysis",
+    "daylysis": "dialysis",
+    "dialisis": "dialysis",
+    "monitoring": "monitoring",
+    "monitring": "monitoring",
+    "interaction": "interaction",
+    "interacion": "interaction",
+    "side effect": "side effect",
+    "sideeffect": "side effect",
+    "contraindication": "contraindication",
+    "contrindication": "contraindication"
+  };
+
+  /**
+   * NLP pre-processor:
+   * 1. Detects and expands abbreviations
+   * 2. Corrects common typos
+   * 3. Returns { cleaned, corrections[] }
+   */
+  function nlpPreprocess(input) {
+    if (!input) return { cleaned: input, corrections: [], expandedAbbrevs: [] };
+
+    let text = input.trim();
+    const corrections = [];
+    const expandedAbbrevs = [];
+
+    // Step 1: Typo correction (word by word)
+    const words = text.split(/\b/);
+    const correctedWords = words.map(word => {
+      const lower = word.toLowerCase().trim();
+      if (TYPO_MAP[lower] && lower !== TYPO_MAP[lower]) {
+        corrections.push({ original: word.trim(), corrected: TYPO_MAP[lower] });
+        return word.replace(word.trim(), TYPO_MAP[lower]);
+      }
+      return word;
+    });
+    text = correctedWords.join("");
+
+    // Step 2: Abbreviation expansion (only for the API query, not displayed)
+    const queryWords = text.split(/\s+/);
+    const expandedForQuery = queryWords.map(w => {
+      const lower = w.toLowerCase().replace(/[^a-z]/g, "");
+      if (ABBREV_MAP[lower]) {
+        expandedAbbrevs.push({ abbrev: w, expanded: ABBREV_MAP[lower] });
+        return ABBREV_MAP[lower];
+      }
+      return w;
+    });
+
+    return {
+      original: input,
+      cleaned: text,  // typo-corrected version (shown to user for awareness)
+      queryText: expandedForQuery.join(" "), // expanded version sent to API
+      corrections,
+      expandedAbbrevs
     };
+  }
 
-    async function postAPI(payload){
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+  /* =====================
+     Smart Suggestions per source type
+  ===================== */
+  const SUGGESTIONS = {
+    monograph: [
+      "What is the recommended dose?",
+      "How to adjust for renal impairment?",
+      "What are the main side effects?",
+      "Any interactions I should know?",
+      "What is the loading dose?",
+    ],
+    protocol: [
+      "What is the empiric therapy pathway?",
+      "When to de-escalate?",
+      "What organisms are targeted?",
+      "What is the step-down criteria?",
+    ],
+    guideline: [
+      "What does the guideline recommend?",
+      "What is the first-line agent?",
+      "What are the treatment duration recommendations?",
+      "Any special populations mentioned?",
+    ],
+    antibiogram: [
+      "What is the local resistance rate?",
+      "Which organisms are most resistant?",
+      "What is the susceptibility for gram-negatives?",
+      "Compare gentamicin vs amikacin susceptibility",
+    ],
+    tdm: [
+      "What is the target trough level?",
+      "How to interpret AUC/MIC?",
+      "When should levels be checked?",
+      "How to adjust dose based on levels?",
+    ],
+    unknown: [
+      "What information does this source contain?",
+      "What are the key recommendations?",
+      "Summarize the main clinical guidance",
+    ]
+  };
 
-      const data = await res.json().catch(() => ({}));
+  function updateSuggestions(sourceType) {
+    const chips = SUGGESTIONS[sourceType] || SUGGESTIONS.unknown;
+    els.chatSuggestions.innerHTML = chips.map(s =>
+      `<button class="suggestion-chip" type="button" onclick="useSuggestion(this)">${escapeHtml(s)}</button>`
+    ).join("");
+    els.chatSuggestions.style.display = "flex";
+  }
 
-      if(!res.ok){
-        throw new Error(data.details || data.error || "API request failed");
-      }
+  function useSuggestion(btn) {
+    els.chatInput.value = btn.textContent;
+    autoResizeInput();
+    sendChatMessage();
+  }
 
-      return data;
+  /* =====================
+     Source badge
+  ===================== */
+  const TYPE_LABELS = {
+    monograph: "Drug Monograph",
+    protocol: "Protocol",
+    guideline: "Guideline",
+    antibiogram: "Antibiogram",
+    tdm: "TDM Reference",
+    unknown: "Knowledge Source"
+  };
+
+  function updateSourceBadge(sourceType) {
+    currentSourceType = sourceType || "unknown";
+    const badge = els.sourceTypeBadge;
+    badge.textContent = TYPE_LABELS[currentSourceType] || "Knowledge Source";
+    badge.className = `chat-source-badge badge-${currentSourceType}`;
+    badge.style.display = "inline-block";
+    els.chatStatusPill.textContent = TYPE_LABELS[currentSourceType] || "Monograph Q&A";
+    updateSuggestions(currentSourceType);
+  }
+
+  /* =====================
+     Patient calculations
+  ===================== */
+  function round1(x){ return Math.round(x*10)/10; }
+  function calcBMI(w,h){ if(!w||!h)return null; const hm=h/100; return w/(hm*hm); }
+  function calcIBW(h,s){ if(!h||!s)return null; const hi=h/2.54; return (s==="M"?50:45.5)+2.3*(hi-60); }
+  function calcAdjBW(w,ibw){ if(!w||!ibw)return null; return w<=ibw?w:ibw+0.4*(w-ibw); }
+  function calcCrCl(a,s,w,scr){ if(!a||!s||!w||!scr)return null; const sd=scr/88.4; let c=((140-a)*w)/(72*sd); if(s==="F")c*=0.85; return c; }
+
+  function getPatient(){
+    return {
+      age:Number(els.age.value||0), sex:els.sex.value||"",
+      weight:Number(els.weight.value||0), height:Number(els.height.value||0),
+      creatinine:Number(els.scr.value||0), aki:els.aki.value||"no",
+      krt:els.krt.value||"none", route_preference:els.routePref.value||"ivpo",
+      severity:els.severity.value||"standard", infusion:els.infusion.value||"traditional"
+    };
+  }
+
+  function patientReady(){
+    const p=getPatient();
+    return !!(p.age&&p.sex&&p.weight&&p.height&&p.creatinine);
+  }
+
+  function updatePatientMetrics(){
+    const p=getPatient();
+    if(!patientReady()){
+      els.patientStatus.textContent="Awaiting Input";
+      els.calcBox.textContent="Patient metrics will be displayed here.";
+      return;
     }
+    const bmi=calcBMI(p.weight,p.height);
+    const ibw=calcIBW(p.height,p.sex);
+    const adjbw=calcAdjBW(p.weight,ibw);
+    const crclTBW=calcCrCl(p.age,p.sex,p.weight,p.creatinine);
+    const crclAdj=adjbw?calcCrCl(p.age,p.sex,adjbw,p.creatinine):null;
+    let dwType="TBW", dw=p.weight;
+    if(bmi&&bmi>=30&&adjbw){dwType="AdjBW";dw=adjbw;}
+    const crclD=calcCrCl(p.age,p.sex,dw,p.creatinine);
+    els.patientStatus.textContent="Ready";
+    els.calcBox.innerHTML=`
+      <b>Actual BW:</b> ${round1(p.weight)} kg &nbsp;|&nbsp;
+      <b>IBW:</b> ${ibw?round1(ibw):"—"} kg &nbsp;|&nbsp;
+      <b>AdjBW:</b> ${adjbw?round1(adjbw):"—"} kg &nbsp;|&nbsp;
+      <b>BMI:</b> ${bmi?round1(bmi):"—"}<br>
+      <b>CrCl (TBW):</b> ${crclTBW?round1(crclTBW):"—"} mL/min &nbsp;|&nbsp;
+      <b>CrCl (AdjBW):</b> ${crclAdj?round1(crclAdj):"—"} mL/min &nbsp;|&nbsp;
+      <b>Dosing Weight:</b> ${dw?round1(dw):"—"} kg (${dwType}) &nbsp;|&nbsp;
+      <b>CrCl (Dosing):</b> ${crclD?round1(crclD):"—"} mL/min
+    `;
+  }
 
-    function escapeHtml(str){
-      return String(str || "").replace(/[&<>"']/g, m => ({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#039;"
-      }[m]));
+  /* =====================
+     API
+  ===================== */
+  async function postAPI(payload){
+    const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.error||"API request failed");
+    return data;
+  }
+
+  /* =====================
+     Source loading
+  ===================== */
+  async function loadDrugs(){
+    try{
+      const data=await postAPI({action:"get_drugs"});
+      SOURCES=Array.isArray(data.drugs)?data.drugs:[];
+      populateSourceDropdowns();
+      if(els.medicationsContainer.children.length===0) addMedicationRow();
+      else refreshAllDrugSelects();
+    }catch(e){
+      els.reviewResult.innerHTML=`<div class="loading">Failed to load sources.</div>`;
     }
+  }
 
-    function renderSources(){
-      els.chatSource.innerHTML = `<option value="">Select a source</option>`;
-      SOURCES.forEach(source => {
-        const opt = document.createElement("option");
-        opt.value = source;
-        opt.textContent = source;
-        els.chatSource.appendChild(opt);
-      });
+  function populateSourceDropdowns(){
+    // Drug Knowledge Assistant dropdown
+    els.questionDrug.innerHTML=`<option value="">Select a source</option>`;
+    SOURCES.forEach(s=>{
+      const o=document.createElement("option");
+      o.value=s; o.textContent=s;
+      els.questionDrug.appendChild(o);
+    });
+    // Therapeutic selection dropdowns
+    refreshAllDrugSelects();
+  }
+
+  function createDrugOptions(select, placeholder="Select a Drug"){
+    select.innerHTML="";
+    const first=document.createElement("option");
+    first.value=""; first.textContent=placeholder;
+    select.appendChild(first);
+    SOURCES.forEach(s=>{
+      const o=document.createElement("option");
+      o.value=s; o.textContent=s;
+      select.appendChild(o);
+    });
+  }
+
+  function createSimpleOptions(select, items, placeholder){
+    select.innerHTML="";
+    const first=document.createElement("option");
+    first.value=""; first.textContent=placeholder;
+    select.appendChild(first);
+    items.forEach(item=>{
+      const o=document.createElement("option");
+      o.value=item.value??item; o.textContent=item.label??item;
+      select.appendChild(o);
+    });
+  }
+
+  function refreshAllDrugSelects(){
+    document.querySelectorAll(".drug-select").forEach(select=>{
+      const current=select.value;
+      createDrugOptions(select);
+      if(SOURCES.includes(current)) select.value=current;
+    });
+  }
+
+  /* =====================
+     Medication rows
+  ===================== */
+  function addMedicationRow(){
+    medCounter+=1;
+    const row=document.createElement("div");
+    row.className="medication-row"; row.dataset.index=medCounter;
+    row.innerHTML=`
+      <div class="med-head">
+        <div>Medication ${medCounter}</div><div></div>
+      </div>
+      <div class="med-grid">
+        <div class="field"><label>Drug</label><select class="drug-select"></select></div>
+        <div class="field"><label>Indication</label><select class="indication-select" disabled><option value="">Select drug first</option></select></div>
+        <div class="field"><label>Sub-Pathway</label><select class="subindication-select" disabled><option value="">Optional / none</option></select></div>
+        <div class="field"><button type="button" class="btn-danger remove-med-btn">Remove</button></div>
+      </div>
+    `;
+    els.medicationsContainer.appendChild(row);
+
+    const drugSel=row.querySelector(".drug-select");
+    const indSel=row.querySelector(".indication-select");
+    const subSel=row.querySelector(".subindication-select");
+    const removeBtn=row.querySelector(".remove-med-btn");
+
+    createDrugOptions(drugSel);
+
+    drugSel.addEventListener("change",async()=>{
+      indSel.disabled=true; subSel.disabled=true;
+      createSimpleOptions(indSel,[],"Loading indications…");
+      createSimpleOptions(subSel,[],"Optional / none");
+      await loadIndicationsForRow(row);
+    });
+    indSel.addEventListener("change",async()=>{ await loadSubIndicationsForRow(row); });
+    removeBtn.addEventListener("click",()=>{ row.remove(); updateTherapyStatus(); });
+    updateTherapyStatus();
+  }
+
+  function updateTherapyStatus(){
+    const count=document.querySelectorAll(".medication-row").length;
+    els.therapyStatus.textContent=count?`${count} Medication${count>1?"s":""}`:"Awaiting Input";
+  }
+
+  async function loadIndicationsForRow(row){
+    const drug=row.querySelector(".drug-select").value;
+    const indSel=row.querySelector(".indication-select");
+    const subSel=row.querySelector(".subindication-select");
+    if(!drug){
+      indSel.disabled=true; subSel.disabled=true;
+      createSimpleOptions(indSel,[],"Select drug first");
+      createSimpleOptions(subSel,[],"Optional / none");
+      return;
     }
-
-    async function loadSources(){
-      try{
-        const data = await postAPI({ action: "get_sources" });
-        SOURCES = Array.isArray(data.sources) ? data.sources : [];
-        renderSources();
-      }catch(e){
-        els.chatMessages.innerHTML = `<div class="loading">${escapeHtml(e.message || "Failed to load sources.")}</div>`;
-      }
-    }
-
-    function addUserMessage(text){
-      CHAT_HISTORY.push({
-        role: "user",
-        content: text
-      });
-      renderChat();
-    }
-
-    function addAssistantMessage(answer, citations = []){
-      CHAT_HISTORY.push({
-        role: "assistant",
-        content: answer,
-        citations
-      });
-      renderChat();
-    }
-
-    function renderChat(){
-      if(!CHAT_HISTORY.length){
-        els.chatMessages.innerHTML = `<div class="empty-state">Choose a source, then start chatting.</div>`;
+    try{
+      const data=await postAPI({action:"get_indications",drug,patient:getPatient()});
+      const indications=Array.isArray(data.indications)?data.indications:[];
+      if(!indications.length){
+        indSel.disabled=true;
+        createSimpleOptions(indSel,[],"No indications found");
+        subSel.disabled=true;
+        createSimpleOptions(subSel,[],"Optional / none");
         return;
       }
+      indSel.disabled=false;
+      createSimpleOptions(indSel,indications.map(i=>({value:i.value||i,label:i.label||i})),"Select an Indication");
+      subSel.disabled=true;
+      createSimpleOptions(subSel,[],"Optional / none");
+    }catch(e){
+      indSel.disabled=true; subSel.disabled=true;
+      createSimpleOptions(indSel,[],"Failed to load");
+      createSimpleOptions(subSel,[],"Optional / none");
+    }
+  }
 
-      let html = "";
+  async function loadSubIndicationsForRow(row){
+    const drug=row.querySelector(".drug-select").value;
+    const indication=row.querySelector(".indication-select").value;
+    const subSel=row.querySelector(".subindication-select");
+    if(!drug||!indication){
+      subSel.disabled=true;
+      createSimpleOptions(subSel,[],"Optional / none");
+      return;
+    }
+    try{
+      const data=await postAPI({action:"get_subindications",drug,indication,patient:getPatient()});
+      const sub=Array.isArray(data.subindications)?data.subindications:[];
+      if(!sub.length){ subSel.disabled=true; createSimpleOptions(subSel,[],"Optional / none"); return; }
+      subSel.disabled=false;
+      createSimpleOptions(subSel,sub.map(i=>({value:i.value||i,label:i.label||i})),"Select a Sub-Pathway");
+    }catch(e){
+      subSel.disabled=true; createSimpleOptions(subSel,[],"Optional / none");
+    }
+  }
 
-      CHAT_HISTORY.forEach(msg => {
-        if(msg.role === "user"){
-          html += `
-            <div class="msg msg-user">
-              <div class="msg-role">You</div>
-              <div class="bubble">${escapeHtml(msg.content)}</div>
-            </div>
-          `;
-        } else {
-          html += `
-            <div class="msg msg-assistant">
-              <div class="msg-role">Assistant</div>
-              <div class="bubble">${escapeHtml(msg.content)}</div>
-              ${
-                Array.isArray(msg.citations) && msg.citations.length
-                  ? `<div class="citations">
-                      ${msg.citations.map(c => `
-                        <div class="citation-card">
-                          <div class="citation-meta">
-                            Source: ${escapeHtml(c.source || "Unknown source")}
-                            ${c.page ? ` | Page ${escapeHtml(String(c.page))}` : ""}
-                          </div>
-                          <div class="citation-quote">${escapeHtml(c.quote || "")}</div>
-                        </div>
-                      `).join("")}
-                    </div>`
-                  : ""
-              }
-            </div>
-          `;
+  function collectSelections(){
+    const meds=[];
+    document.querySelectorAll(".medication-row").forEach(row=>{
+      meds.push({
+        drug:row.querySelector(".drug-select").value||"",
+        indication:row.querySelector(".indication-select").value||"",
+        sub_indication:row.querySelector(".subindication-select").value||""
+      });
+    });
+    return meds.filter(m=>m.drug);
+  }
+
+  async function runMedicationReview(){
+    if(!patientReady()){els.reviewResult.innerHTML=`<div class="loading">Please complete patient profile first.</div>`;return;}
+    const medications=collectSelections();
+    if(!medications.length){els.reviewResult.innerHTML=`<div class="loading">Please add at least one medication.</div>`;return;}
+    if(medications.some(m=>!m.indication)){els.reviewResult.innerHTML=`<div class="loading">Please select indication for each medication.</div>`;return;}
+    els.reviewResult.innerHTML=`<div class="loading">Generating regimen…</div>`;
+    try{
+      const data=await postAPI({action:"calculate_review",patient:getPatient(),medications});
+      renderReview(data);
+    }catch(e){
+      els.reviewResult.innerHTML=`<div class="loading">${escapeHtml(e.message||"Failed to generate regimen.")}</div>`;
+    }
+  }
+
+  function renderReview(data){
+    if(!data||!data.ok){els.reviewResult.innerHTML=`<div class="loading">No structured output returned.</div>`;return;}
+    let html="";
+    const review=Array.isArray(data.medication_review)?data.medication_review:[];
+    if(!review.length) html+=`<div class="muted">No regimen output returned.</div>`;
+    review.forEach(item=>{
+      html+=`
+        <div class="review-card">
+          <h4>${escapeHtml(item.drug||"Medication")}</h4>
+          <div class="review-line"><b>Indication:</b> ${escapeHtml(item.indication||"—")}</div>
+          <div class="review-line"><b>Sub-Pathway:</b> ${escapeHtml(item.sub_indication||"—")}</div>
+          <div class="review-line"><b>Dose:</b> ${escapeHtml(item.recommended_dose||"—")}</div>
+          <div class="review-line"><b>Frequency:</b> ${escapeHtml(item.recommended_frequency||"—")}</div>
+          <div class="review-line"><b>Duration:</b> ${escapeHtml(item.recommended_duration||"—")}</div>
+          <div class="review-line"><b>Administration:</b> ${escapeHtml(item.administration||"—")}</div>
+          <div class="review-line"><b>Monitoring:</b> ${Array.isArray(item.monitoring)&&item.monitoring.length?escapeHtml(item.monitoring.join(", ")):"—"}</div>
+          <div class="review-line"><b>Strategy:</b> ${escapeHtml(item.therapy_strategy||"—")}</div>
+          <div class="review-line"><b>Evidence:</b> ${Array.isArray(item.evidence)&&item.evidence.length?escapeHtml(item.evidence.join(" | ")):"—"}</div>
+        </div>`;
+    });
+    if(data.ddi_summary&&Array.isArray(data.ddi_summary.interactions)&&data.ddi_summary.interactions.length){
+      html+=`<div class="review-card"><h4>Drug-Drug Interactions</h4>`;
+      data.ddi_summary.interactions.forEach((ddi,idx)=>{
+        html+=`
+          <div class="review-line"><b>Pair:</b> ${escapeHtml(ddi.pair||"—")}</div>
+          <div class="review-line"><b>Rating:</b> <span class="ddi-badge">${escapeHtml(ddi.rating||"—")}</span></div>
+          <div class="review-line"><b>Management:</b> ${escapeHtml(ddi.management||"—")}</div>
+          ${idx<data.ddi_summary.interactions.length-1?`<hr class="divider">`:``}`;
+      });
+      html+=`</div>`;
+    }
+    if(Array.isArray(data.global_warnings)&&data.global_warnings.length){
+      html+=`<div class="warn-list"><b>Additional Notes</b><br>`;
+      data.global_warnings.forEach(w=>{ html+=`• ${escapeHtml(w)}<br>`; });
+      html+=`</div>`;
+    }
+    els.reviewResult.innerHTML=html||`<div class="muted">No regimen output returned.</div>`;
+  }
+
+  /* =====================
+     ADVANCED CHATBOT
+  ===================== */
+
+  function hideEmptyState(){
+    if(els.emptyState) els.emptyState.style.display="none";
+  }
+
+  function appendMessage(role, content, meta={}){
+    hideEmptyState();
+    const msg=document.createElement("div");
+    msg.className=`msg msg-${role}`;
+
+    const avatar=document.createElement("div");
+    avatar.className=`msg-avatar avatar-${role}`;
+    avatar.textContent=role==="user"?"U":"AI";
+
+    const bubble=document.createElement("div");
+    bubble.className=`msg-bubble bubble-${role}`;
+
+    // Correction notice
+    if(meta.corrections && meta.corrections.length>0){
+      const notice=document.createElement("div");
+      notice.className="correction-notice";
+      const corrList=meta.corrections.map(c=>`<i>${escapeHtml(c.original)}</i> → <b>${escapeHtml(c.corrected)}</b>`).join(", ");
+      notice.innerHTML=`<span class="icon">✏️</span> Spelling corrected: ${corrList}`;
+      bubble.appendChild(notice);
+    }
+
+    // Message text
+    const textNode=document.createElement("div");
+    textNode.innerHTML=formatChatText(content);
+    bubble.appendChild(textNode);
+
+    // Evidence quotes
+    if(meta.evidence && meta.evidence.length>0){
+      const evBlock=document.createElement("div");
+      evBlock.className="evidence-block";
+      const evLabel=document.createElement("div");
+      evLabel.className="evidence-label";
+      evLabel.textContent="Supporting Evidence";
+      evBlock.appendChild(evLabel);
+      meta.evidence.forEach(ev=>{
+        const q=document.createElement("div");
+        q.className="evidence-quote";
+        q.innerHTML=`${escapeHtml(ev.quote||"")}
+          <div class="evidence-source">📄 ${escapeHtml(ev.source||"Source")}${ev.page?` · Page ${escapeHtml(String(ev.page))}`:""}</div>`;
+        evBlock.appendChild(q);
+      });
+      bubble.appendChild(evBlock);
+    }
+
+    msg.appendChild(avatar);
+    msg.appendChild(bubble);
+    els.chatMessages.appendChild(msg);
+    els.chatMessages.scrollTop=els.chatMessages.scrollHeight;
+    return msg;
+  }
+
+  function appendTypingIndicator(){
+    hideEmptyState();
+    const msg=document.createElement("div");
+    msg.className="msg msg-bot";
+    msg.id="typingIndicator";
+    msg.innerHTML=`
+      <div class="msg-avatar avatar-bot">AI</div>
+      <div class="msg-bubble bubble-bot">
+        <div class="chat-typing">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>`;
+    els.chatMessages.appendChild(msg);
+    els.chatMessages.scrollTop=els.chatMessages.scrollHeight;
+    return msg;
+  }
+
+  function removeTypingIndicator(){
+    const el=document.getElementById("typingIndicator");
+    if(el) el.remove();
+  }
+
+  function formatChatText(text){
+    if(!text) return "";
+    // Bold **text**
+    text=text.replace(/\*\*(.*?)\*\*/g,"<b>$1</b>");
+    // Newlines
+    text=text.replace(/\n/g,"<br>");
+    return escapeHtmlExceptTags(text);
+  }
+
+  function escapeHtmlExceptTags(str){
+    // Don't double-escape already-placed <b> and <br> tags
+    return str
+      .replace(/&(?!amp;|lt;|gt;|quot;|#039;)/g,"&amp;")
+      .replace(/<(?!\/?b>|br>)/g,"&lt;");
+  }
+
+  async function sendChatMessage(){
+    if(isChatLoading) return;
+
+    const source=els.questionDrug.value;
+    const rawInput=els.chatInput.value.trim();
+
+    if(!source){
+      appendMessage("bot","⚠️ Please select a knowledge source before asking a question.");
+      return;
+    }
+    if(!rawInput) return;
+
+    // NLP preprocessing
+    const nlp=nlpPreprocess(rawInput);
+    const displayText=nlp.cleaned; // show corrected text
+    const queryText=nlp.queryText;  // enriched query for API
+
+    // Add user message (show corrected version with notice if corrections were made)
+    appendMessage("user", displayText, {
+      corrections: nlp.corrections.length > 0 ? nlp.corrections : null
+    });
+
+    // Add to history
+    chatHistory.push({ role:"user", content: displayText });
+
+    // Clear input
+    els.chatInput.value="";
+    autoResizeInput();
+    els.chatSendBtn.disabled=true;
+    isChatLoading=true;
+
+    const typingEl=appendTypingIndicator();
+
+    try{
+      const data=await postAPI({
+        action:"drug_question",
+        drug: source,
+        question: queryText, // use NLP-enhanced query
+        patient: getPatient(),
+        chat_history: chatHistory.slice(-6) // send last 6 turns for context
+      });
+
+      removeTypingIndicator();
+
+      if(data&&data.ok){
+        const answer=data.answer||"I couldn't find a clear answer in the selected source.";
+        appendMessage("bot", answer, {
+          evidence: Array.isArray(data.evidence) ? data.evidence : []
+        });
+        chatHistory.push({ role:"assistant", content: answer });
+        // Keep history manageable
+        if(chatHistory.length>20) chatHistory=chatHistory.slice(-20);
+      } else {
+        appendMessage("bot","⚠️ Unable to get an answer from the selected source. Please try rephrasing your question.");
+      }
+    }catch(e){
+      removeTypingIndicator();
+      appendMessage("bot",`⚠️ Error: ${escapeHtml(e.message||"Request failed. Please try again.")}`);
+    }finally{
+      isChatLoading=false;
+      els.chatSendBtn.disabled=!els.chatInput.value.trim();
+    }
+  }
+
+  function clearChat(){
+    chatHistory=[];
+    els.chatMessages.innerHTML="";
+    // Re-show empty state
+    const es=document.createElement("div");
+    es.id="emptyState";
+    es.className="empty-state";
+    es.innerHTML=`
+      <div class="empty-icon">💊</div>
+      <div class="empty-text">
+        Select a knowledge source above, then ask anything.<br>
+        <span style="font-size:11px;color:#b0c0d0">Supports natural language, medical abbreviations &amp; spelling correction</span>
+      </div>`;
+    els.chatMessages.appendChild(es);
+    // Re-assign reference
+    els.emptyState=es;
+  }
+
+  function autoResizeInput(){
+    const el=els.chatInput;
+    el.style.height="auto";
+    el.style.height=Math.min(el.scrollHeight, 110)+"px";
+  }
+
+  /* =====================
+     Source type detection on dropdown change
+  ===================== */
+  els.questionDrug.addEventListener("change", async () => {
+    const selected = els.questionDrug.value;
+    if(!selected){
+      els.sourceTypeBadge.style.display="none";
+      els.chatSuggestions.style.display="none";
+      return;
+    }
+
+    // Detect source type from name heuristics (client-side, matching backend logic)
+    const lower = selected.toLowerCase();
+    let sType = "monograph";
+    if(/antibiogram/.test(lower)) sType="antibiogram";
+    else if(/\btdm\b|therapeutic.*drug.*monitor/.test(lower)) sType="tdm";
+    else if(/protocol/.test(lower)) sType="protocol";
+    else if(/guideline|guidance|guide/.test(lower)) sType="guideline";
+
+    updateSourceBadge(sType);
+    clearChat();
+  });
+
+  /* =====================
+     Chat input events
+  ===================== */
+  els.chatInput.addEventListener("input", () => {
+    autoResizeInput();
+    els.chatSendBtn.disabled = !els.chatInput.value.trim() || isChatLoading;
+  });
+
+  els.chatInput.addEventListener("keydown", (e) => {
+    if(e.key==="Enter" && !e.shiftKey){
+      e.preventDefault();
+      if(!isChatLoading && els.chatInput.value.trim()) sendChatMessage();
+    }
+  });
+
+  els.chatSendBtn.addEventListener("click", sendChatMessage);
+  els.clearChatBtn.addEventListener("click", clearChat);
+
+  /* =====================
+     Reset form
+  ===================== */
+  function resetForm(){
+    [els.age,els.weight,els.height,els.scr].forEach(i=>i.value="");
+    els.sex.value=""; els.aki.value="no"; els.krt.value="none";
+    els.routePref.value="ivpo"; els.severity.value="standard"; els.infusion.value="traditional";
+    els.calcBox.textContent="Patient metrics will be displayed here.";
+    els.patientStatus.textContent="Awaiting Input";
+    els.medicationsContainer.innerHTML=""; medCounter=0; addMedicationRow();
+    els.reviewResult.textContent="Regimen output will appear here.";
+    clearChat();
+  }
+
+  /* =====================
+     Patient change listeners
+  ===================== */
+  [els.age,els.sex,els.weight,els.height,els.scr,els.aki,els.krt,els.routePref,els.severity,els.infusion]
+    .forEach(el=>{
+      el.addEventListener("input",updatePatientMetrics);
+      el.addEventListener("change",async()=>{
+        updatePatientMetrics();
+        const rows=document.querySelectorAll(".medication-row");
+        for(const row of rows){
+          const drug=row.querySelector(".drug-select").value;
+          const indication=row.querySelector(".indication-select").value;
+          if(drug){
+            await loadIndicationsForRow(row);
+            if(indication){
+              row.querySelector(".indication-select").value=indication;
+              await loadSubIndicationsForRow(row);
+            }
+          }
         }
       });
-
-      els.chatMessages.innerHTML = html;
-      els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
-    }
-
-    async function sendChatMessage(){
-      const source = els.chatSource.value;
-      const message = els.chatInput.value.trim();
-      const language = els.chatLanguage.value;
-      const evidenceMode = els.chatEvidenceMode.value;
-
-      if(!source){
-        addAssistantMessage("Please select a source first.", []);
-        return;
-      }
-
-      if(!message){
-        addAssistantMessage("Please enter a message.", []);
-        return;
-      }
-
-      addUserMessage(message);
-      els.chatInput.value = "";
-
-      const loadingIndex = CHAT_HISTORY.length;
-      CHAT_HISTORY.push({
-        role: "assistant",
-        content: "Searching selected source...",
-        citations: []
-      });
-      renderChat();
-
-      try{
-        const historyPayload = CHAT_HISTORY
-          .filter(m => m.role === "user" || m.role === "assistant")
-          .slice(0, -1)
-          .map(m => ({
-            role: m.role,
-            content: m.content
-          }));
-
-        const data = await postAPI({
-          action: "source_chat",
-          source,
-          message,
-          language,
-          evidence_mode: evidenceMode,
-          history: historyPayload
-        });
-
-        CHAT_HISTORY.splice(loadingIndex, 1);
-
-        addAssistantMessage(
-          data.answer || "No answer returned.",
-          Array.isArray(data.citations) ? data.citations : []
-        );
-      }catch(e){
-        CHAT_HISTORY.splice(loadingIndex, 1);
-        addAssistantMessage(e.message || "Failed to get response.", []);
-      }
-    }
-
-    function clearChat(){
-      CHAT_HISTORY = [];
-      renderChat();
-    }
-
-    els.sendChatBtn.addEventListener("click", sendChatMessage);
-
-    els.chatInput.addEventListener("keydown", (e) => {
-      if(e.key === "Enter" && !e.shiftKey){
-        e.preventDefault();
-        sendChatMessage();
-      }
     });
 
-    els.clearChatBtn.addEventListener("click", clearChat);
+  els.addDrugBtn.addEventListener("click",addMedicationRow);
+  els.reviewBtn.addEventListener("click",runMedicationReview);
+  els.resetBtn.addEventListener("click",resetForm);
 
-    document.querySelectorAll(".chip").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const chip = btn.dataset.chip || "";
-        els.chatInput.value = chip;
-        els.chatInput.focus();
-      });
-    });
+  function escapeHtml(str){
+    return String(str||"").replace(/[&<>"']/g,m=>({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
 
-    loadSources();
-    renderChat();
-  </script>
+  updatePatientMetrics();
+  loadDrugs();
+</script>
 </body>
 </html>
