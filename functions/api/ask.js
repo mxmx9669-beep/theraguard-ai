@@ -40,11 +40,13 @@ export async function onRequest(context) {
 
     return json({ ok: false, error: "Unknown action" }, 400, corsHeaders);
   } catch (error) {
+    console.error("API ERROR:", error);
+
     return json(
       {
         ok: false,
         error: "Server error",
-        details: String(error),
+        details: String(error && error.stack ? error.stack : error),
       },
       500,
       corsHeaders
@@ -125,8 +127,8 @@ async function listVectorStoreFiles(env) {
         filename,
         source_name: sourceName,
       });
-    } catch (_) {
-      // ignore single-file failure
+    } catch (err) {
+      console.error("FILE READ ERROR:", fileId, err);
     }
   }
 
@@ -169,12 +171,11 @@ async function findSourceFiles(env, source) {
   const exact = files.filter(f => normalize(f.source_name) === target);
   if (exact.length) return exact;
 
-  const loose = files.filter(
-    f =>
-      normalize(f.source_name).includes(target) ||
-      target.includes(normalize(f.source_name)) ||
-      normalize(f.filename).includes(target)
-  );
+  const loose = files.filter(f => {
+    const src = normalize(f.source_name);
+    const name = normalize(f.filename);
+    return src.includes(target) || target.includes(src) || name.includes(target);
+  });
 
   return loose;
 }
@@ -206,7 +207,9 @@ function filterResultsByFileIds(results, fileIds) {
 
 function buildFileMap(files) {
   const map = new Map();
-  for (const f of files) map.set(f.file_id, f);
+  for (const f of files) {
+    map.set(f.file_id, f);
+  }
   return map;
 }
 
@@ -224,15 +227,16 @@ function mapResultsToEvidence(results, fileMap) {
   const evidence = [];
 
   for (const item of results) {
-    const textChunk = Array.isArray(item.content)
-      ? item.content.find(c => c.type === "text" && c.text)
-      : null;
+    const parts = Array.isArray(item.content) ? item.content : [];
+    const textChunk = parts.find(c => c && c.type === "text" && c.text);
 
-    if (!textChunk?.text) continue;
+    if (!textChunk || !textChunk.text) continue;
+
+    const mapped = fileMap.get(item.file_id);
 
     evidence.push({
       file_id: item.file_id || null,
-      source: fileMap.get(item.file_id)?.filename || fileMap.get(item.file_id)?.source_name || "Unknown source",
+      source: mapped?.filename || mapped?.source_name || "Unknown source",
       text: textChunk.text,
       page: parsePageFromText(textChunk.text),
     });
@@ -344,7 +348,7 @@ async function answerSourceChat(env, body) {
     .map(item => `${item.role.toUpperCase()}: ${String(item.content || "").trim()}`)
     .join("\n");
 
-  let query = [
+  const query = [
     source,
     message,
     compactHistory
